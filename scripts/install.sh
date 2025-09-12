@@ -47,7 +47,7 @@ if [ -z "$TAG" ]; then
     exit 1
 fi
 
-FILE_NAME="${BIN_NAME}-${TAG}-${ARCH}-${OS}.tar.gz"
+FILE_NAME="${BIN_NAME}-${ARCH}-${OS}.tar.gz"
 DOWNLOAD_URL="https://github.com/$OWNER/$REPO/releases/download/$TAG/$FILE_NAME"
 
 printf "%b\n" "${BLUE}Downloading $FILE_NAME...${NC}"
