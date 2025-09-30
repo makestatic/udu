@@ -73,7 +73,7 @@ pub fn get_win_size_windows() ?WinSize {
     const kernel32 = std.os.windows.kernel32;
     var info: std.os.windows.CONSOLE_SCREEN_BUFFER_INFO = undefined;
     const h = kernel32.GetStdHandle(std.os.windows.STD_OUTPUT_HANDLE);
-    if (kernel32.GetConsoleScreenBufferInfo(h, &info) == 0) return null;
+    if (kernel32.GetConsoleScreenBufferInfo(h.?, &info) == 0) return null;
 
     return WinSize{
         .ws_row = @intCast(info.srWindow.Bottom - info.srWindow.Top + 1),
