@@ -1,6 +1,6 @@
-# udu
+# UDU
 
-A fast, multithreaded, cross-platform alternative to GNU `du`.  While `du` has long been my tool of choice for checking file and directory sizes, it has become slow, inconsistent, and occasionally inaccurate. `udu` isn’t a full drop-in replacement yet, but it gets the job done... for me at least.
+A fast, multithreaded, cross-platform alternative to GNU `du`.  While `du` has long been my tool of choice for checking file and directory sizes, it has become slow, inconsistent, and occasionally inaccurate. `UDU` isn’t a full drop-in replacement yet, but it gets the job done... for me at least.
 
 ## Installation
 
@@ -24,5 +24,6 @@ sudo cp ./zig-out/bin/udu /usr/bin/
 ## License
 <sub>
 Copyright © 2023–2025 <a href="https://github.com/makestatic">Ali Almalki</a>.  
-`udu` is distributed under the terms of the [GPLv3 license](LICENSE).
+
+`UDU` IS DISTRIBUTED UNDER THE TERMS OF THE <a href="./LICENSE">GPLV3</a>.
 </sub>
