@@ -21,7 +21,10 @@ make
 sudo make install
 
 # if Make is not avalibale
-zig build -Doptimize=$(OPT_SAFE) --prefix $(BUILD_DIR) --summary all -Dstrip
+zig build -Doptimize=ReleaseFast
+
+# installing
+cp ./zig-out/bin/udu /usr/bin/
 ```
 
 ## Usage
@@ -29,7 +32,7 @@ zig build -Doptimize=$(OPT_SAFE) --prefix $(BUILD_DIR) --summary all -Dstrip
 ```console
 udu <path> [OPTIONS]
 
-Options:
+OPTIONS:
     -ex=<path>      Exclude directory (repeatable)
     -q, --quiet     Quiet output (default)
     -v, --verbose   Verbose output

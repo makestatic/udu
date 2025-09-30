@@ -1,6 +1,6 @@
 udu <path> [OPTIONS]
 
-Options:
+OPTIONS:
     -ex=<path>      Exclude directory (repeatable)
     -q, --quiet     Quiet output (default)
     -v, --verbose   Verbose output
