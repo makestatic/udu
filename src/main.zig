@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2023 Ali Almalki <github@makestatic>
+// Copyright (C) 2023, 2024, 2025 Ali Almalki <github@makestatic>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,61 +16,22 @@
 //
 
 const std = @import("std");
+const human_size = @import("util.zig").human_size;
+const comma_format = @import("util.zig").comma_format;
+const WinSize = @import("util.zig").WinSize;
+const get_terminal_size = @import("util.zig").get_terminal_size;
+const get_win_size_linux = @import("util.zig").get_win_size_linux;
+const get_win_size_bsd = @import("util.zig").get_win_size_bsd;
+const get_win_size_windows = @import("util.zig").get_win_size_windows;
+
 const usage = @embedFile("usage.txt");
-pub const version = "1.0.0";
+pub const version = "1.0.1";
 
-pub const WinSize = struct {
-    ws_row: u16,
-    ws_col: u16,
-    ws_xpixel: u16,
-    ws_ypixel: u16,
-};
-
-fn get_win_size_linux() ?WinSize {
-    var ws: WinSize = undefined;
-    const TIOCGWINSZ: c_ulong = 0x5413;
-    if (std.c.ioctl(std.c.STDOUT_FILENO, TIOCGWINSZ, &ws) < 0) return null;
-    return ws;
-}
-
-fn get_win_size_bsd() ?WinSize {
-    var ws: WinSize = undefined;
-    const TIOCGWINSZ: c_ulong = 0x40087468;
-    if (std.c.ioctl(std.c.STDOUT_FILENO, TIOCGWINSZ, &ws) < 0) return null;
-    return ws;
-}
-
-fn get_win_size_windows() ?WinSize {
-    const kernel32 = @cImport({
-        @cInclude("windows.h");
-    });
-
-    var info: kernel32.CONSOLE_SCREEN_BUFFER_INFO = undefined;
-    const h = kernel32.GetStdHandle(kernel32.STD_OUTPUT_HANDLE);
-    if (kernel32.GetConsoleScreenBufferInfo(h, &info) == 0) return null;
-
-    return WinSize{
-        .ws_row = @intCast(info.srWindow.Bottom - info.srWindow.Top + 1),
-        .ws_col = @intCast(info.srWindow.Right - info.srWindow.Left + 1),
-        .ws_xpixel = 0,
-        .ws_ypixel = 0,
-    };
-}
-
-pub fn get_terminal_size() ?WinSize {
-    return switch (@import("builtin").os.tag) {
-        .linux => get_win_size_linux(),
-        .macos, .freebsd => get_win_size_bsd(),
-        .windows => get_win_size_windows(),
-        else => null,
-    };
-}
-
-const TargetInfo = struct {
+const Target = struct {
     os: []const u8,
     arch: []const u8,
 
-    pub fn init() TargetInfo {
+    pub fn init() Target {
         const target = @import("builtin").target;
 
         const os = switch (target.os.tag) {
@@ -87,7 +48,7 @@ const TargetInfo = struct {
             else => "Unknown",
         };
 
-        return TargetInfo{ .os = os, .arch = arch };
+        return Target{ .os = os, .arch = arch };
     }
 };
 
@@ -169,6 +130,7 @@ const Udu = struct {
 };
 
 fn process_dir(self: *Udu, path: []u8, exs: []const []const u8, opts: Options) void {
+    // free passed memory
     defer self.allocator.free(path);
 
     var dir = std.fs.cwd().openDir(path, .{
@@ -241,7 +203,7 @@ fn process_dir(self: *Udu, path: []u8, exs: []const []const u8, opts: Options) v
 }
 
 pub fn main() !void {
-    const target = TargetInfo.init();
+    const target = Target.init();
 
     var gpa = std.heap.GeneralPurposeAllocator(.{ .thread_safe = true }){};
     defer std.debug.assert(gpa.deinit() == .ok);
@@ -255,7 +217,6 @@ pub fn main() !void {
         std.process.exit(1);
     }
 
-    const path = args[1];
     var parsed = parse_args(args, allocator) catch |err| {
         std.debug.print("[ERROR]: {s}\n\n{s}", .{ @errorName(err), usage });
         std.process.exit(1);
@@ -269,11 +230,17 @@ pub fn main() !void {
         std.debug.print("{s}", .{usage});
         std.process.exit(0);
     }
-
-    if (opts.version) {
-        std.debug.print("version: {s} [{s}/{s}]\n", .{ version, target.os, target.arch });
-        std.process.exit(0);
+    if (std.mem.containsAtLeast(u8, args[1], 1, "-")) {
+        if (opts.version) {
+            std.debug.print("v{s} [{s}/{s}]\n", .{ version, target.os, target.arch });
+            std.process.exit(0);
+        }
+        std.debug.print("{s}", .{usage});
+        std.debug.print("\n[ERROR] first argument must be a <path>\n", .{});
+        std.process.exit(1);
     }
+
+    const path = args[1];
 
     var inst = Udu.init(allocator);
     defer inst.deinit();
@@ -288,9 +255,13 @@ pub fn main() !void {
 
     std.debug.print(
         \\
-        \\| Directories  | {s}
-        \\| Files        | {s}
-        \\| Size         | {s} ({s}) 
+        \\ ------------------------------------------
+        \\¦ Directories  ¦  {s}
+        \\ ------------------------------------------
+        \\¦ Files        ¦  {s}
+        \\ ------------------------------------------
+        \\¦ Total        ¦  {s} ({s}) 
+        \\ ------------------------------------------
         \\
     , .{
         try comma_format(&buf_dirs, inst.dirs_count.load(.monotonic)),
@@ -298,52 +269,4 @@ pub fn main() !void {
         try comma_format(&buf_size, size),
         try human_size(&buf_mb, size),
     });
-}
-
-fn human_size(buf: []u8, bytes: u64) ![]u8 {
-    const KB: f64 = 1024.0;
-    const MB = KB * 1024.0;
-    const GB = MB * 1024.0;
-    const TB = GB * 1024.0;
-
-    const fbytes = @as(f64, @floatFromInt(bytes));
-
-    if (bytes >= @as(u64, @intFromFloat(TB)))
-        return std.fmt.bufPrint(buf, "{d:.2}TB", .{fbytes / TB});
-    if (bytes >= @as(u64, @intFromFloat(GB)))
-        return std.fmt.bufPrint(buf, "{d:.2}GB", .{fbytes / GB});
-    if (bytes >= @as(u64, @intFromFloat(MB)))
-        return std.fmt.bufPrint(buf, "{d:.2}MB", .{fbytes / MB});
-    if (bytes >= 1024)
-        return std.fmt.bufPrint(buf, "{d:.2}KB", .{fbytes / KB});
-    return std.fmt.bufPrint(buf, "{d}B", .{bytes});
-}
-
-fn comma_format(buf: []u8, value: u64) ![]u8 {
-    if (value == 0) return std.fmt.bufPrint(buf, "0", .{});
-
-    var temp = value;
-    var digit_count: usize = 0;
-    while (temp > 0) : (temp /= 10) digit_count += 1;
-
-    const comma_count = (digit_count - 1) / 3;
-    const total_len = digit_count + comma_count;
-
-    var pos = total_len;
-    temp = value;
-    var digits_since_comma: usize = 0;
-
-    while (temp > 0) {
-        if (digits_since_comma == 3) {
-            pos -= 1;
-            buf[pos] = ',';
-            digits_since_comma = 0;
-        }
-        pos -= 1;
-        buf[pos] = '0' + @as(u8, @intCast(temp % 10));
-        temp /= 10;
-        digits_since_comma += 1;
-    }
-
-    return buf[0..total_len];
 }

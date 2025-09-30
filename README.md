@@ -1,23 +1,27 @@
 # udu
-A Fast, Multithreaded, Cross-Platform alternative to GNU du.
+A fast, multithreaded, cross-Platform alternative to GNU du.
 
 ## Installation
 ```console
 curl -sSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
 ```
 
-## Build
+## Build from source
 
 Requirements:
-- [Unix OS](https://en.wikipedia.org/wiki/Unix)
 - [Zig 0.15.1+](https://ziglang.org/download/)
-- [GNU Make](https://www.gnu.org/software/make/)
+- [GNU Make](https://www.gnu.org/software/make/) (optional)
 
 ```console
-git clone https://github.com/makestatic/udu.git
+git clone --depth=1 https://github.com/makestatic/udu.git
 cd udu
+
+# if Make avalibale
 make
 sudo make install
+
+# if Make is not avalibale
+zig build -Doptimize=$(OPT_SAFE) --prefix $(BUILD_DIR) --summary all -Dstrip
 ```
 
 ## Usage
@@ -27,8 +31,8 @@ udu <path> [OPTIONS]
 
 Options:
     -ex=<path>      Exclude directory (repeatable)
-    -v, --verbose   Verbose output
     -q, --quiet     Quiet output (default)
+    -v, --verbose   Verbose output
     -h, --help      Show this help message
     --version       Show version
 

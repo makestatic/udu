@@ -2,8 +2,8 @@ udu <path> [OPTIONS]
 
 Options:
     -ex=<path>      Exclude directory (repeatable)
-    -v, --verbose   Verbose output
     -q, --quiet     Quiet output (default)
+    -v, --verbose   Verbose output
     -h, --help      Show this help message
     --version       Show version
 
