@@ -1,47 +1,28 @@
 # udu
-A fast, multithreaded, cross-Platform alternative to GNU du.
+
+A fast, multithreaded, cross-platform alternative to GNU `du`.  While `du` has long been my tool of choice for checking file and directory sizes, it has become slow, inconsistent, and occasionally inaccurate. `udu` isn’t a full drop-in replacement yet, but it gets the job done... for me at least.
 
 ## Installation
-```console
-curl -sSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
-```
-
-## Build from source
-
-Requirements:
-- [Zig 0.15.1+](https://ziglang.org/download/)
-- [GNU Make](https://www.gnu.org/software/make/) (optional)
 
 ```console
+# Install via script (recommended)
+curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
+
+# Build from source (Zig 0.15.1 only)
 git clone --depth=1 https://github.com/makestatic/udu.git
 cd udu
 
-# if Make avalibale
+# if make is available
 make
 sudo make install
 
-# if Make is not avalibale
+# if make is not available
 zig build -Doptimize=ReleaseFast
-
-# installing
-cp ./zig-out/bin/udu /usr/bin/
-```
-
-## Usage
-
-```console
-udu <path> [OPTIONS]
-
-OPTIONS:
-    -ex=<path>      Exclude directory (repeatable)
-    -q, --quiet     Quiet output (default)
-    -v, --verbose   Verbose output
-    -h, --help      Show this help message
-    --version       Show version
-
-EXAMPLE:
-    udu ~/ -v
+sudo cp ./zig-out/bin/udu /usr/bin/
 ```
 
 ## License
-[GPLv3 or later](LICENSE)
+<sub>
+Copyright © 2023–2025 <a href="https://github.com/makestatic">Ali Almalki</a>.  
+`udu` is distributed under the terms of the [GPLv3 license](LICENSE).
+</sub>
