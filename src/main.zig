@@ -20,9 +20,6 @@ const human_size = @import("util.zig").human_size;
 const comma_format = @import("util.zig").comma_format;
 const WinSize = @import("util.zig").WinSize;
 const get_terminal_size = @import("util.zig").get_terminal_size;
-const get_win_size_linux = @import("util.zig").get_win_size_linux;
-const get_win_size_bsd = @import("util.zig").get_win_size_bsd;
-const get_win_size_windows = @import("util.zig").get_win_size_windows;
 
 const usage = @embedFile("usage.txt");
 pub const version = "1.0.1";
