@@ -6,15 +6,18 @@ UDU is a fast, multithreaded, cross-platform solution for checking files and dir
 > *C version is %40 faster than the Zig version*
 
 
-## Dependencies
+## Install via script
+curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
+
+
+## Build from source
+
+### Dependencies
 
 - **C**: GCC or Clang with OpenMP (v5.0+) support  
 - **Zig**: Zig 0.15.1 or later  
 - **Unix**: `make` (for installing)  
 - **Windows**: C compiler (MinGW/Clang)
-
-
-## Build from source
 
 ```bash
 git clone --depth=1 https://github.com/makestatic/udu.git  
