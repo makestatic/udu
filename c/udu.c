@@ -52,7 +52,7 @@
 #endif
 
 static const char* usage =
-  "Usage: udu <path> [-ex=<namelpath>] [-v|--verbose] [-q|--quiet] "
+  "Usage: udu <path> [-ex=<name|path>] [-v|--verbose] [-q|--quiet] "
   "[-h|--help] [--version]\n";
 
 static const char* license =
@@ -61,7 +61,7 @@ static const char* license =
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* version = "1.0.8";
+static const char* version = "1.0.10";
 
 struct WinSize
 {
