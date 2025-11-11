@@ -3,12 +3,14 @@
 UDU is a fast, multithreaded, cross-platform solution for checking files and directories sizes.
 
 > [!NOTE]
-> *C version is %40 faster than the Zig version*
+> *the C version is %40 faster than the Zig version*
 
 
 ## Install via script
-curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
 
+```bash
+curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
+```
 
 ## Build from source
 
