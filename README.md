@@ -2,11 +2,11 @@
 UDU is a fast, multithreaded, cross-platform solution for checking files and directories sizes.
 
 
+
 > [!NOTE]
-> *the C version is %40 faster than the Zig version*
+> *The C version is almost 40% faster than the Zig version at some cases*
 
-
-[Here’s a Reddit post I made discussing this outcome](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/).
+[Here's a Reddit post I made discussing this outcome](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/).
 
 
 ## Quick Install (zig version only)
@@ -19,7 +19,7 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 
 ### Minimal requirements
 
-- GCC (12.1) or Clang (14) or MSVS (16.8) 
+- GCC (12.1) or Clang (14) or MSVC (16.8) 
 - OpenMP 4.0 (optional but recommended)
 - CMake 3.15
 - Zig 0.15.2
@@ -44,7 +44,7 @@ cmake -B build -DENABLE_LTO=OFF     # Disable link-time optimization
 ```
 
 
-### Build Zig version & Install
+### Build Zig version
 Navigate to `zig` directory and run the following command:
 
 ```bash
