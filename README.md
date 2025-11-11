@@ -1,88 +1,78 @@
 # UDU
-
 UDU is a fast, multithreaded, cross-platform solution for checking files and directories sizes.
+
 
 > [!NOTE]
 > *the C version is %40 faster than the Zig version*
 
-
-## Install via script
+## Quick Install (zig version only)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
 ```
 
-## Build from source
+## Build from Source
 
-### Dependencies
+### Minimal requirements
 
-- **C**: GCC or Clang with OpenMP (v5.0+) support  
-- **Zig**: Zig 0.15.1 or later  
-- **Unix**: `make` (for installing)  
-- **Windows**: C compiler (MinGW/Clang)
+- GCC (12.1) or Clang (14) or MSVS (16.8) 
+- OpenMP 4.0 (optional but recommended)
+- CMake 3.15
+- Zig 0.15.2
 
 ```bash
-git clone --depth=1 https://github.com/makestatic/udu.git  
+git clone --depth=1 https://github.com/makestatic/udu.git
 cd udu
 ```
 
-### Unix
-
-**Build C binary**
+### Build C version & Install
 
 ```bash
-make  
-sudo make install
+cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build
+cmake --install build  # admin required
 ```
 
-**Build Zig binary**
+**Build options**
+```bash
+cmake -B build -DENABLE_OPENMP=OFF  # Disable parallel processing
+cmake -B build -DENABLE_LTO=OFF     # Disable link-time optimization
+```
+
+
+### Build Zig version & Install
+Navigate to `zig` directory and run the following command:
 
 ```bash
-make zig  
-sudo make install
+zig build -Doptimize=ReleaseSafe
 ```
-
-### Windows (PowerShell)
-
-**Build C binary**
-
-```powershell
-.\Make.ps1 -Target c  
-.\Make.ps1 -Install
-```
-
-**Build Zig binary**
-
-```powershell
-.\Make.ps1 -Target zig  
-.\Make.ps1 -Install
-```
-
-### Direct Zig build (all platforms)
-
-```bash
-cd zig && zig build -Doptimize=ReleaseFast
-```
-
-- Unix: `sudo cp ./zig-out/bin/udu /usr/local/bin/udu`  
-- Windows: Copy `./zig-out/bin/udu.exe` to a folder in your `PATH`
 
 
 ## Usage
 
-``` bash
-udu <path> [-ex=<name_or_path>] [-v|--verbose] [-q|--quiet] [-h|--help] [--version]
+```bash
+udu <path> 
+    [-ex=<name|path>]
+    [-v|--verbose]
+    [-q|--quiet]
+    [-h|--help]
+    [--version]
 ```
 
-- `-ex=<name_or_path>` — Exclude file or directory from scanning  
-- `-v, --verbose` — Show per-file output  
-- `-q, --quiet` — Suppress per-file output  
-- `-h, --help` — Show usage  
-- `--version` — Show version  
+**Options**
+- `-ex=<n>` — exclude file/directory
+- `-v, --verbose` — verbose output
+- `-q, --quiet` — quiet output
+- `-h, --help` — show help message
+- `--version` — show version
 
+**Examples**
+```bash
+udu /home                      # Scan home directory
+udu -ex=node_modules .         # Exclude node_modules
+udu /var -ex=cache -ex=tmp -v  # Multiple exclusions, verbose
+```
 
 ## License
 
-Copyright © 2023–2025 Ali Almalki ([@makestatic](https://github.com/makestatic))  
-
-UDU is distributed under the terms of the [GPLv3](./LICENSE).
+GPLv3 © 2023-2025 Ali Almalki [@makestatic](https://github.com/makestatic))
