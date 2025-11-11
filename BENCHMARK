@@ -1,0 +1,24 @@
+Benchmarked with [hyperfine](https://github.com/sharkdp/hyperfine), using the following command:
+
+	hyperfine --warmup 1 -r 3 './zig/zig-out/bin/udu /usr/' './build/udu /usr/'
+
+- Zig version: 0.15.2
+- GCC version: 15.2.1
+
+	COMMANDS
+
+	C:
+	cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+	cmake --build build
+
+	Zig:
+	zig build -Doptimize=ReleaseSafe
+
+
+| Version    | Mean Time | Stddev	 | Speedup             |
+|------------|-----------|-----------|---------------------|
+| Zig (STD)  | 18.488 s	 | ± 0.130 s | —			       |
+| C (OpenMP) | 13.671 s	 | ± 0.622 s | 1.35× (~26% faster) |
+
+
+
