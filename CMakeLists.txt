@@ -16,16 +16,19 @@ add_executable(udu ${UDU_SOURCES})
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     # Use -O2 instead of -O3 due to known bugs with -O3
-    # - GCC 15.2.1: bug with opts.verbose at -O3
-    # - Clang 21.1.5: sigfault with -O3
+    # - GCC 15.2.1: overwrite opts.verbose
+    # - Clang 21.1.5: sigfault
     target_compile_options(udu PRIVATE
         -Wall
         -Wextra
+		-Wshadow
+		-Wconversion
+        -pedantic
         -O2
     )
     
     # cpu specific optimizations
-    if(CMAKE_BUILD_TYPE MATCHES "Release")
+	if(CMAKE_BUILD_TYPE MATCHES "Release|RelWithDebInfo")
         target_compile_options(udu PRIVATE -march=native)
     endif()
 elseif(MSVC)
