@@ -29,6 +29,7 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include <errno.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -38,10 +39,16 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif
 #else
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 #endif
 
 static const char* usage =
@@ -54,7 +61,7 @@ static const char* license =
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* version = "1.0.1";
+static const char* version = "1.0.8";
 
 struct WinSize
 {
@@ -63,6 +70,8 @@ struct WinSize
 
 static bool get_terminal_size(struct WinSize* ws)
 {
+    if (!ws) return false;
+
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
@@ -85,6 +94,8 @@ static bool get_terminal_size(struct WinSize* ws)
 
 static void human_size(char* buf, size_t bufsz, unsigned long long bytes)
 {
+    if (!buf || bufsz == 0) return;
+
     const char* units[] = { "B", "K", "M", "G", "T", "P" };
     double v = (double)bytes;
     int i = 0;
@@ -101,6 +112,8 @@ static void human_size(char* buf, size_t bufsz, unsigned long long bytes)
 
 static void k_formater(char* buf, size_t bufsz, unsigned long long val)
 {
+    if (!buf || bufsz == 0) return;
+
     char tmp[64];
     int pos = 0;
     if (val == 0)
@@ -116,7 +129,7 @@ static void k_formater(char* buf, size_t bufsz, unsigned long long val)
     }
     while (val > 0 && pos < (int)(sizeof(tmp) - 1))
     {
-        tmp[pos++] = '0' + (val % 10);
+        tmp[pos++] = '0' + (char)(val % 10);
         val /= 10;
     }
     char out[128];
@@ -150,13 +163,18 @@ typedef struct
 
 static void exclude_init(ExcludeList* e)
 {
+    if (!e) return;
     e->items = NULL;
     e->count = e->capacity = 0;
 }
 
 static void exclude_free(ExcludeList* e)
 {
-    for (size_t i = 0; i < e->count; i++) free(e->items[i]);
+    if (!e) return;
+    for (size_t i = 0; i < e->count; i++)
+    {
+        free(e->items[i]);
+    }
     free(e->items);
     e->items = NULL;
     e->count = e->capacity = 0;
@@ -164,6 +182,8 @@ static void exclude_free(ExcludeList* e)
 
 static int exclude_add(ExcludeList* e, const char* s)
 {
+    if (!e || !s) return -1;
+
     if (e->count + 1 > e->capacity)
     {
         size_t n = e->capacity ? e->capacity * 2 : 4;
@@ -178,15 +198,20 @@ static int exclude_add(ExcludeList* e, const char* s)
     return 0;
 }
 
-static bool exclude_match_any(ExcludeList* e, const char* s)
+static bool exclude_match_any(const ExcludeList* e, const char* s)
 {
+    if (!e || !s) return false;
+
     for (size_t i = 0; i < e->count; i++)
-        if (strcmp(e->items[i], s) == 0) return true;
+    {
+        if (e->items[i] && strcmp(e->items[i], s) == 0) return true;
+    }
     return false;
 }
 
-static atomic_size_t g_dirs = 0;
-static atomic_ullong g_files = 0, g_size = 0;
+static atomic_size_t g_dirs = ATOMIC_VAR_INIT(0);
+static atomic_ullong g_files = ATOMIC_VAR_INIT(0);
+static atomic_ullong g_size = ATOMIC_VAR_INIT(0);
 
 typedef struct
 {
@@ -195,6 +220,8 @@ typedef struct
 
 static void join_path(char* out, size_t outlen, const char* a, const char* b)
 {
+    if (!out || outlen == 0 || !a || !b) return;
+
     if (a[0] == '\0')
     {
         snprintf(out, outlen, "%s", b);
@@ -211,34 +238,43 @@ static void join_path(char* out, size_t outlen, const char* a, const char* b)
 #endif
 }
 
-#define TASK_DEPTH_THRESHOLD 64 // TODO: a more machinery way to setting this
+#define TASK_DEPTH_THRESHOLD 64
 
 static void process_dir(const char* path,
-                        ExcludeList* exs,
+                        const ExcludeList* exs,
                         Options opts,
                         int depth)
 {
+    if (!path || !exs) return;
+
 #ifdef _WIN32
     WIN32_FIND_DATAA ffd;
-    char search_path[MAX_PATH];
-    snprintf(search_path, sizeof(search_path), "%s\\*", path);
+    char search_path[PATH_MAX];
+    int ret = snprintf(search_path, sizeof(search_path), "%s\\*", path);
+    if (ret < 0 || (size_t)ret >= sizeof(search_path)) return;
+
     HANDLE hFind = FindFirstFileA(search_path, &ffd);
     if (hFind == INVALID_HANDLE_VALUE) return;
+
     size_t local_dirs = 1;
     unsigned long long local_files = 0, local_size = 0;
+
     do
     {
         const char* name = ffd.cFileName;
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) continue;
-        char full[MAX_PATH];
+
+        char full[PATH_MAX];
         join_path(full, sizeof(full), path, name);
+
         if (exclude_match_any(exs, name) || exclude_match_any(exs, full))
             continue;
+
         if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
             if (depth < TASK_DEPTH_THRESHOLD)
             {
-#pragma omp task firstprivate(full, depth) shared(exs, opts)
+#pragma omp task firstprivate(full, depth, opts) shared(exs)
                 process_dir(full, exs, opts, depth + 1);
             }
             else
@@ -247,15 +283,14 @@ static void process_dir(const char* path,
         else
         {
             local_files++;
-            local_size +=
+            unsigned long long file_size =
               ((unsigned long long)ffd.nFileSizeHigh << 32) | ffd.nFileSizeLow;
+            local_size += file_size;
+
             if (opts.verbose)
             {
                 char sizebuf[32];
-                human_size(sizebuf,
-                           sizeof(sizebuf),
-                           ((unsigned long long)ffd.nFileSizeHigh << 32) |
-                             ffd.nFileSizeLow);
+                human_size(sizebuf, sizeof(sizebuf), file_size);
                 printf("%-8s %s\n", sizebuf, full);
             }
         }
@@ -264,24 +299,30 @@ static void process_dir(const char* path,
 #else
     DIR* d = opendir(path);
     if (!d) return;
+
     struct dirent* ent;
     size_t local_dirs = 1;
     unsigned long long local_files = 0, local_size = 0;
+
     while ((ent = readdir(d)) != NULL)
     {
         const char* name = ent->d_name;
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0) continue;
+
         char full[PATH_MAX];
         join_path(full, sizeof(full), path, name);
+
         if (exclude_match_any(exs, name) || exclude_match_any(exs, full))
             continue;
+
         struct stat st;
         if (lstat(full, &st) != 0) continue;
+
         if (S_ISDIR(st.st_mode))
         {
             if (depth < TASK_DEPTH_THRESHOLD)
             {
-#pragma omp task firstprivate(full, depth) shared(exs, opts)
+#pragma omp task firstprivate(full, depth, opts) shared(exs)
                 process_dir(full, exs, opts, depth + 1);
             }
             else
@@ -290,11 +331,13 @@ static void process_dir(const char* path,
         else if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode))
         {
             local_files++;
-            local_size += st.st_size;
+            local_size += (unsigned long long)st.st_size;
+
             if (opts.verbose)
             {
                 char sizebuf[32];
-                human_size(sizebuf, sizeof(sizebuf), st.st_size);
+                human_size(
+                  sizebuf, sizeof(sizebuf), (unsigned long long)st.st_size);
                 printf("%-8s %s\n", sizebuf, full);
             }
         }
@@ -312,16 +355,21 @@ static int parse_args(int argc,
                       ExcludeList* exs,
                       Options* opts)
 {
+    if (!argv || !out_path || !exs || !opts) return -1;
+
     opts->verbose = opts->quiet = opts->help = opts->version = false;
     *out_path = NULL;
+
     for (int i = 1; i < argc; i++)
     {
         char* a = argv[i];
+        if (!a) continue;
+
         if (strncmp(a, "-ex=", 4) == 0)
         {
             if (exclude_add(exs, a + 4) != 0)
             {
-                fprintf(stderr, "Out of memory\n");
+                fprintf(stderr, "[ERROR] Out of memory\n");
                 return -1;
             }
         }
@@ -355,6 +403,7 @@ int main(int argc, char** argv)
     exclude_init(&exs);
     Options opts;
     char* path;
+
     if (parse_args(argc, argv, &path, &exs, &opts) != 0)
     {
         exclude_free(&exs);
