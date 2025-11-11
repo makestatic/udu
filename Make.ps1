@@ -35,11 +35,7 @@ function Install {
     if (Test-Path "$BIN_DIR\$TARGET.exe") {
         $dest = "C:\Windows\System32\$TARGET.exe"
         Copy-Item "$BIN_DIR\$TARGET.exe" -Destination $dest -Force
-        Write-Host "Installed C binary to $dest"
-    } elseif (Test-Path "$BUILD_DIR\zig-out\bin\$TARGET.exe") {
-        $dest = "C:\Windows\System32\$TARGET.exe"
-        Copy-Item "$BUILD_DIR\zig-out\bin\$TARGET.exe" -Destination $dest -Force
-        Write-Host "Installed Zig binary to $dest"
+        Write-Host "Installed binary to $dest"
     } else {
         Write-Host "No binary found to install."
     }

@@ -27,15 +27,9 @@ zig:
 # 	cd zig && zig build -Doptimize=$(OPT_DEBUG) --prefix ../$(BUILD_DIR)
 
 install: 
-	@if [ "$(INSTALL_TARGET)" = "zig" ]; then \
-		echo "Installing Zig binary..."; \
+		echo "Installing binary..."; \
 		sudo mv $(BUILD_DIR)/zig-out/bin/$(TARGET) /usr/local/bin/$(TARGET); \
-		echo "Installed Zig binary to /usr/local/bin/$(TARGET)"; \
-	else \
-		echo "Installing C binary..."; \
-		sudo mv $(BIN_DIR)/$(TARGET) /usr/local/bin/$(TARGET); \
-		echo "Installed C binary to /usr/local/bin/$(TARGET)"; \
-	fi
+		echo "Installed binary to /usr/local/bin/$(TARGET)"; \
 
 clean:
 	@echo "Cleaning build directories..."

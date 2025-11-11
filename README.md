@@ -32,14 +32,14 @@ cd udu
 
 ```bash
 make  
-sudo make install INSTALL_TARGET=c
+sudo make install
 ```
 
 **Build Zig binary**
 
 ```bash
 make zig  
-sudo make install INSTALL_TARGET=zig
+sudo make install
 ```
 
 ### Windows (PowerShell)
@@ -48,14 +48,14 @@ sudo make install INSTALL_TARGET=zig
 
 ```powershell
 .\Make.ps1 -Target c  
-.\Make.ps1 -Install -Target c
+.\Make.ps1 -Install
 ```
 
 **Build Zig binary**
 
 ```powershell
 .\Make.ps1 -Target zig  
-.\Make.ps1 -Install -Target zig
+.\Make.ps1 -Install
 ```
 
 ### Direct Zig build (all platforms)
