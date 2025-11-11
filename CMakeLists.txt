@@ -29,7 +29,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     
     # cpu specific optimizations
 	if(CMAKE_BUILD_TYPE MATCHES "Release|RelWithDebInfo")
-        target_compile_options(udu PRIVATE -march=native)
+        target_compile_options(udu PRIVATE -mtune=native -mcpu=native -march=native)
     endif()
 elseif(MSVC)
     target_compile_options(udu PRIVATE
