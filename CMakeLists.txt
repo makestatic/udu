@@ -67,6 +67,8 @@ else()
     target_compile_definitions(udu PRIVATE 
         _XOPEN_SOURCE=700
         _POSIX_C_SOURCE=200809L
+		_FORTIFY_SOURCE=2
+		_GNU_SOURCE
     )
 endif()
 
@@ -86,7 +88,7 @@ message(STATUS "  LTO: ${ENABLE_LTO}")
 message(STATUS "========================================")
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+	set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
         "Choose the type of build: Debug Release RelWithDebInfo MinSizeRel"
         FORCE)
 endif()

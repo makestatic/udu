@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2023, 2024, 2025 Ali Almalki <github@makestatic>
+/* Copyright (C) 2023, 2024, 2025 Ali Almalki <github@makestatic>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,15 +12,16 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
+
+// TODO: docement this so future me doesn't hate past me
+
+
+
 
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-
-#define _XOPEN_SOURCE 700
-#define _POSIX_C_SOURCE 200809L
 
 #include <dirent.h>
 #include <inttypes.h>
@@ -238,7 +238,7 @@ static void join_path(char* out, size_t outlen, const char* a, const char* b)
 #endif
 }
 
-#define TASK_DEPTH_THRESHOLD 64
+#define TASK_DEPTH_THRESHOLD 64 // TODO: more machinery way setting this
 
 static void process_dir(const char* path,
                         const ExcludeList* exs,
