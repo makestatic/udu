@@ -11,7 +11,7 @@ UDU is a fast, multithreaded, cross-platform solution for checking files and dir
 - **C**: GCC or Clang with OpenMP (v5.0+) support  
 - **Zig**: Zig 0.15.1 or later  
 - **Unix**: `make` (for installing)  
-- **Windows**: C compiler (MSVS/MinGW/Clang)
+- **Windows**: C compiler (MinGW/Clang)
 
 
 ## Build from source
