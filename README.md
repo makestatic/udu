@@ -1,29 +1,83 @@
 # UDU
 
-A fast, multithreaded, cross-platform alternative to GNU `du`.  While `du` has long been my tool of choice for checking file and directory sizes, it has become slow, inconsistent, and occasionally inaccurate. `UDU` isn’t a full drop-in replacement yet, but it gets the job done... for me at least.
+UDU is a fast, multithreaded, cross-platform alternative to GNU `du`.  It provides a faster, more efficient solution for checking file and directory sizes.
 
-## Installation
+> [!NOTE]
+> *C version is %40 faster than the Zig version+
 
-```console
-# Install via script (recommended)
-curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
 
-# Build from source (Zig 0.15.1 only)
-git clone --depth=1 https://github.com/makestatic/udu.git
+## Dependencies
+
+- **C**: GCC or Clang with OpenMP (v5.0+) support  
+- **Zig**: Zig 0.15.1 or later  
+- **Unix**: `make` (for install)  
+- **Windows**: PowerShell, MSVS/MinGW/Clang 1or C build
+
+
+## Build from source
+
+```bash
+git clone --depth=1 https://github.com/makestatic/udu.git  
 cd udu
-
-# if make is available
-make
-sudo make install
-
-# if make is not available
-zig build -Doptimize=ReleaseFast
-sudo cp ./zig-out/bin/udu /usr/bin/
 ```
 
-## License
-<sub>
-Copyright © 2023–2025 <a href="https://github.com/makestatic">Ali Almalki</a>.  
+### Unix
 
-`UDU` IS DISTRIBUTED UNDER THE TERMS OF THE <a href="./LICENSE">GPLV3</a>.
-</sub>
+**Build C binary**
+
+```bash
+make  
+sudo make install INSTALL_TARGET=c
+```
+
+**Build Zig binary**
+
+```bash
+make zig  
+sudo make install INSTALL_TARGET=zig
+```
+
+### Windows (PowerShell)
+
+**Build C binary**
+
+```powershell
+.\Make.ps1 -Target c  
+.\Make.ps1 -Install -Target c
+```
+
+**Build Zig binary**
+
+```powershell
+.\Make.ps1 -Target zig  
+.\Make.ps1 -Install -Target zig
+```
+
+### Direct Zig build (all platforms)
+
+```bash
+zig build -Doptimize=ReleaseFast
+```
+
+- Unix: `sudo cp ./zig-out/bin/udu /usr/local/bin/udu`  
+- Windows: Copy `./zig-out/bin/udu.exe` to a folder in your `PATH`
+
+
+## Usage
+
+``` bash
+udu <path> [-ex=<name_or_path>] [-v|--verbose] [-q|--quiet] [-h|--help] [--version]
+```
+
+- `-ex=<name_or_path>` — Exclude file or directory from scanning  
+- `-v, --verbose` — Show per-file output  
+- `-q, --quiet` — Suppress per-file output  
+- `-h, --help` — Show usage  
+- `--version` — Show version  
+
+
+## License
+
+Copyright © 2023–2025 Ali Almalki ([@makestatic](https://github.com/makestatic))  
+
+UDU is distributed under the terms of the [GPLv3](./LICENSE).
