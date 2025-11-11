@@ -52,7 +52,7 @@
 #endif
 
 static const char* usage =
-  "Usage: udu <path> [-ex=<name_or_path>] [-v|--verbose] [-q|--quiet] "
+  "Usage: udu <path> [-ex=<namelpath>] [-v|--verbose] [-q|--quiet] "
   "[-h|--help] [--version]\n";
 
 static const char* license =
