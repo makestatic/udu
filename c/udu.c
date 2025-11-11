@@ -211,7 +211,7 @@ static void join_path(char* out, size_t outlen, const char* a, const char* b)
 #endif
 }
 
-#define TASK_DEPTH_THRESHOLD 64
+#define TASK_DEPTH_THRESHOLD 64 // TODO: a more machinery way to setting this
 
 static void process_dir(const char* path,
                         ExcludeList* exs,
@@ -371,12 +371,6 @@ int main(int argc, char** argv)
         printf("version: %s\n%s\n", version, license);
         exclude_free(&exs);
         return 0;
-    }
-    if (path[0] == '-' && !opts.help && !opts.version)
-    {
-        fprintf(stderr, "%s\n[ERROR] first argument must be a <path>\n", usage);
-        exclude_free(&exs);
-        return 1;
     }
 
     struct WinSize ws;
