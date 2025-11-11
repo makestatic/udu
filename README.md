@@ -3,15 +3,15 @@
 UDU is a fast, multithreaded, cross-platform alternative to GNU `du`.  It provides a faster, more efficient solution for checking file and directory sizes.
 
 > [!NOTE]
-> *C version is %40 faster than the Zig version+
+> *C version is %40 faster than the Zig version*
 
 
 ## Dependencies
 
 - **C**: GCC or Clang with OpenMP (v5.0+) support  
 - **Zig**: Zig 0.15.1 or later  
-- **Unix**: `make` (for install)  
-- **Windows**: PowerShell, MSVS/MinGW/Clang 1or C build
+- **Unix**: `make` (for installing)  
+- **Windows**: C compiler (MSVS/MinGW/Clang)
 
 
 ## Build from source
@@ -56,7 +56,7 @@ sudo make install INSTALL_TARGET=zig
 ### Direct Zig build (all platforms)
 
 ```bash
-zig build -Doptimize=ReleaseFast
+cd zig && zig build -Doptimize=ReleaseFast
 ```
 
 - Unix: `sudo cp ./zig-out/bin/udu /usr/local/bin/udu`  
