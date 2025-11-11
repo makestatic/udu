@@ -61,7 +61,7 @@ static const char* license =
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* version = "1.0.10";
+static const char* version = "1.0.11";
 
 struct WinSize
 {

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(udu VERSION 1.0.10 LANGUAGES C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON) # (gnu)
+set(CMAKE_C_EXTENSIONS ON) # (gnu exts)
 
 option(ENABLE_OPENMP "Enable OpenMP support" ON)
 option(ENABLE_LTO "Enable Link Time Optimization" ON)
@@ -15,7 +15,7 @@ set(UDU_SOURCES
 add_executable(udu ${UDU_SOURCES})
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    # Use -O2 instead of -O3 due to known bugs with -O3
+    # Using -O2 instead of -O3 due to known bugs with -O3
     # - GCC 15.2.1: overwrite opts.verbose
     # - Clang 21.1.5: sigfault
     target_compile_options(udu PRIVATE
