@@ -5,6 +5,10 @@ UDU is a fast, multithreaded, cross-platform solution for checking files and dir
 > [!NOTE]
 > *the C version is %40 faster than the Zig version*
 
+
+[Here’s a Reddit post I made discussing this outcome](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/).
+
+
 ## Quick Install (zig version only)
 
 ```bash
