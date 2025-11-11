@@ -5,7 +5,7 @@ C_SRC = c/udu.c
 OPT_SAFE = ReleaseFast
 OPT_DEBUG = Debug
 
-.PHONY: all clean install c zig release debug
+.PHONY: all clean install c zig
 
 # Default: build C binary
 all: c
