@@ -1,6 +1,6 @@
 # UDU
 
-UDU is a fast, multithreaded, cross-platform alternative to GNU `du`.  It provides a faster, more efficient solution for checking files and directories sizes.
+UDU is a fast, multithreaded, cross-platform solution for checking files and directories sizes.
 
 > [!NOTE]
 > *C version is %40 faster than the Zig version*
