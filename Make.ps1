@@ -11,7 +11,7 @@ $C_SRC     = "c\udu.c"
 function Build-C {
     Write-Host "Building C binary..."
     if (-Not (Test-Path $BIN_DIR)) { New-Item -ItemType Directory -Force -Path $BIN_DIR | Out-Null }
-    cc -O3 -std=gnu99 -Wall -Wextra -fopenmp -march=native -flto -o "$BIN_DIR\$TARGET.exe" $C_SRC
+    cc -O2 -std=gnu99 -Wall -Wextra -fopenmp -march=native -flto -o "$BIN_DIR\$TARGET.exe" $C_SRC
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 

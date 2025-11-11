@@ -14,7 +14,8 @@ c:
 	@echo "Building C binary..."
 	mkdir -p $(BIN_DIR)
 	# GCC Preferable
-	cc -g -O3 -march=native -flto -fopenmp -std=gnu99 -Wall -Wextra -o $(BIN_DIR)/$(TARGET) $(C_SRC)
+	# using -O2 and not -O3 cause a bug happen in (udu.c)opts.verbose when compiling with -O3 (GCC 15.2.1)
+	cc -g -O2 -march=native -flto -fopenmp -std=gnu99 -Wall -Wextra -fuse-ld=mold -o $(BIN_DIR)/$(TARGET) $(C_SRC)
 
 zig:
 	@echo "Building Zig binary..."
