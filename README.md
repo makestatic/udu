@@ -75,4 +75,4 @@ udu /var -ex=cache -ex=tmp -v  # Multiple exclusions, verbose
 
 ## License
 
-GPLv3 © 2023-2025 Ali Almalki [@makestatic](https://github.com/makestatic))
+GPLv3 © 2023-2025 Ali Almalki [@makestatic](https://github.com/makestatic)
