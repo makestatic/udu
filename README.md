@@ -19,8 +19,8 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 
 ### Minimal requirements
 
-- GCC (12.1) or Clang (14) or MSVC (16.8) 
-- OpenMP 4.0 (optional but recommended)
+- GCC (10.5) / Clang (14) / MSVC (not tested)
+- OpenMP 3.1 (optional but recommended)
 - CMake 3.15
 - Zig 0.15.2
 
