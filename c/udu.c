@@ -14,13 +14,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// TODO: docement this so future me doesn't hate past me
+// TODO: docement this so future me doesn't hate me.. more
 
 
 
 
-#ifdef _WIN32
+
+#if defined(_WIN32) || defined(WIN32) // incase of direct compiling
 #define _CRT_SECURE_NO_WARNINGS
+#else
+#define _XOPEN_SOURCE 700
+#define _POSIX_C_SOURCE 200809L
+#define _FORTIFY_SOURCE 2
+#define _GNU_SOURCE
 #endif
 
 #include <dirent.h>
@@ -37,7 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(WIN32)
 #include <windows.h>
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
@@ -53,15 +59,21 @@
 
 static const char* usage =
   "Usage: udu <path> [-ex=<name|path>] [-v|--verbose] [-q|--quiet] "
-  "[-h|--help] [--version]\n";
+  "[-h|--help] [--version]\n\n\n"
+  "OPTIONS\n"
+  "-ex=<n>	       exclude file or directory\n"
+  "-v, --verbose   verbose output\n"
+  "-q, --quiet     quiet output\n"
+  "-h, --help      show help message\n"
+  "--version       show version\n";
 
 static const char* license =
-  "udu  Copyright (C) 2023, 2024, 2025  Ali Almalki <github@makestatic>\n"
+  "Copyright (C) 2023, 2024, 2025  Ali Almalki <github@makestatic>\n"
   "This program comes with ABSOLUTELY NO WARRANTY.\n"
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* version = "1.0.11";
+static const char* version = "1.0.12";
 
 struct WinSize
 {
