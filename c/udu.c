@@ -75,7 +75,7 @@ static const char* LICENSE =
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* VERSION = "2.0.1";
+static const char* VERSION = "2.0.2";
 
 #define MAX_TASK_DEPTH 64
 #define EX_INIT_CAPACITY 4
@@ -498,9 +498,12 @@ int main(int argc, char** argv)
     fmt_comma(byte_str, sizeof(byte_str), total_bytes);
     human_size(human_str, sizeof(human_str), total_bytes);
 
-    printf("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  Dirs   %s\n"
-           "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  Files  %s\n"
-           "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n  Total  %s (%s)\n"
+    printf("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+           "  Dirs   : %s\n"
+           "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+           "  Files  : %s\n"
+           "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+           "  Total  : %s (%s)\n"
            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
            dir_str,
            file_str,
