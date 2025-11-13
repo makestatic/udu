@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(udu VERSION 1.0.12 LANGUAGES C)
+project(udu VERSION 2.0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON) # (gnu exts)
 
 option(ENABLE_OPENMP "Enable OpenMP support" ON)
 option(ENABLE_LTO "Enable Link Time Optimization" ON)
@@ -49,17 +48,6 @@ if(ENABLE_LTO)
     else()
         message(WARNING "LTO not supported: ${ipo_error}")
     endif()
-endif()
-
-if(WIN32)
-    target_compile_definitions(udu PRIVATE _CRT_SECURE_NO_WARNINGS)
-else()
-    target_compile_definitions(udu PRIVATE 
-        _XOPEN_SOURCE=700
-        _POSIX_C_SOURCE=200809L
-        _FORTIFY_SOURCE=2
-        _GNU_SOURCE
-    )
 endif()
 
 include(GNUInstallDirs)

@@ -6,6 +6,8 @@ UDU is a fast, multithreaded, cross-platform solution for checking files and dir
 > [!NOTE]
 > *The C version is almost 40% faster than the Zig version at some cases*
 
+[Benchmarks](./BENCHMARK).
+
 [Here's a Reddit post I made discussing this outcome](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/).
 
 
@@ -19,9 +21,11 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 
 ### Minimal requirements
 
-- GCC (10.5) / Clang (14) / MSVC (not tested)
-- OpenMP 3.1 (optional but recommended)
+- GCC (8.1+) / Clang (11.1+) / MSVC (16+)
+- OpenMP 3.1+ (optional but recommended)
 - CMake 3.15
+
+If you want to build the zig version you need:
 - Zig 0.15.2
 
 ```bash
@@ -63,14 +67,14 @@ udu <path>
     [--version]
 ```
 
-**Options**
-- `-ex=<n>` — exclude file/directory
-- `-v, --verbose` — verbose output
-- `-q, --quiet` — quiet output
-- `-h, --help` — show help message
-- `--version` — show version
+**OPTIONS:**
+- `-ex=<name>`      Exclude file or directory
+- `-v, --verbose`   Verbose output
+- `-q, --quiet`     Quiet output (default)
+- `-h, --help`      Show help message
+- `--version`       Show version
 
-**Examples**
+**EXAMPLES:**
 ```bash
 udu /home                      # Scan home directory
 udu -ex=node_modules .         # Exclude node_modules
@@ -79,4 +83,4 @@ udu /var -ex=cache -ex=tmp -v  # Multiple exclusions, verbose
 
 ## License
 
-GPLv3
+[GPLv3](./LICENSE)
