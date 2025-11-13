@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _OPENMP
+#if defined(_OPENMP) && !defined(_MSC_VER)
 #include <omp.h>
 #endif
 
@@ -318,7 +318,7 @@ static void scan_dir(const char* path, const Excludes* ex, Opts opts, int depth)
 
         if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(_MSC_VER)
             if (depth < MAX_TASK_DEPTH)
             {
 #pragma omp task firstprivate(full, depth, opts) shared(ex)
@@ -365,7 +365,7 @@ static void scan_dir(const char* path, const Excludes* ex, Opts opts, int depth)
 
         if (S_ISDIR(st.st_mode))
         {
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(_MSC_VER)
             if (depth < MAX_TASK_DEPTH)
             {
 #pragma omp task firstprivate(full, depth, opts) shared(ex)
@@ -477,13 +477,13 @@ int main(int argc, char** argv)
     Term term;
     get_term(&term);
 
-#ifdef _OPENMP
+#if defined(_OPENMP) && !defined(_MSC_VER)
     int nthreads = omp_get_num_procs();
     if (nthreads <= 0) nthreads = 4;
     omp_set_num_threads(nthreads);
 #endif
 
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(_MSC_VER)
 #pragma omp parallel
 #pragma omp single nowait
 #endif
