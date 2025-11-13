@@ -23,7 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 - CMake ≥ 3.15
 
 If you want to build the Zig version, you need:
-- Zig 0.15.2 (for Zig version)
+- Zig 0.15.2
 
 
 Clone the repository:
