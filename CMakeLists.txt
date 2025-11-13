@@ -26,16 +26,19 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 		  $<$<CONFIG:Release>:-mtune=native -mcpu=native -march=native>
 		  $<$<CONFIG:RelWithDebInfo>:-mtune=native -mcpu=native -march=native>
     )
-    
 endif()
 
 if(ENABLE_OPENMP)
-    find_package(OpenMP)
-    if(OpenMP_C_FOUND)
-        target_link_libraries(udu PRIVATE OpenMP::OpenMP_C)
-        message(STATUS "OpenMP enabled")
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "MSVC")
+        find_package(OpenMP)
+        if(OpenMP_C_FOUND)
+            target_link_libraries(udu PRIVATE OpenMP::OpenMP_C)
+            message(STATUS "OpenMP enabled")
+        else()
+            message(WARNING "OpenMP not found, building without parallel support")
+        endif()
     else()
-        message(WARNING "OpenMP not found, building without parallel support")
+        message(WARNING "OpenMP disabled for MSVC (only supports 2.0; required 3.1+)")
     endif()
 endif()
 
