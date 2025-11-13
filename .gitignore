@@ -4,4 +4,3 @@ zig/zig-out/
 /.zig-cache/
 zig/.zig-cache/
 *.log
-
