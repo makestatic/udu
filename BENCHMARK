@@ -4,8 +4,10 @@ Benchmarked with [hyperfine](https://github.com/sharkdp/hyperfine), using the fo
 
 - Zig version: 0.15.2
 - GCC version: 15.2.1
+- Clang version: 21.1.5
+(GCC > Clang)
 
-	COMMANDS
+	BUILD COMMANDS
 
 	C:
 	cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
@@ -15,10 +17,11 @@ Benchmarked with [hyperfine](https://github.com/sharkdp/hyperfine), using the fo
 	zig build -Doptimize=ReleaseSafe
 
 
-| Version    | Mean Time | Stddev	 | Speedup             |
-|------------|-----------|-----------|---------------------|
-| Zig (STD)  | 18.488 s	 | ± 0.130 s | —			       |
-| C (OpenMP) | 13.671 s	 | ± 0.622 s | 1.35× (~26% faster) |
+| Version    | Mean Time | Speedup             |
+|------------|-----------|---------------------|
+| Zig (STD)  | 18.488 s  | —                   |
+| C (1.0.12) | 13.671 s  | 1.35× (~26% faster) |
+| C (2.0.1)  | 12.036 s  | 1.54× (~35% faster) |
 
 
 
