@@ -9,28 +9,21 @@ option(ENABLE_LTO "Enable Link Time Optimization" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
-								"Choose the type of build: Debug Release RelWithDebInfo MinSizeRel"
-								FORCE)
+	"Choose the type of build: Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 
 add_executable(udu c/udu.c)
 
-if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	target_compile_options(udu PRIVATE
-								-Wall -Wextra -Wshadow -Wconversion -pedantic
-								$<$<CONFIG:Release>:-march=native -mtune=native>
-								$<$<CONFIG:RelWithDebInfo>:-march=native -mtune=native>
-				)
-elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
-	target_compile_options(udu PRIVATE
-								-Wall -Wextra -Wshadow -Wconversion -pedantic
-								$<$<CONFIG:Release>:-mcpu=native>
-								$<$<CONFIG:RelWithDebInfo>:-mcpu=native>
-				)
+		-Wall -Wextra -Wshadow -Wconversion -pedantic
+		$<$<CONFIG:Release>:-march=native -mtune=native>
+		$<$<CONFIG:RelWithDebInfo>:-march=native -mtune=native>
+	)
 elseif(MSVC)
 	target_compile_options(udu PRIVATE
-								/W4 /permissive- /volatile:iso /EHsc
-				)
+		/W4 /permissive- /volatile:iso /EHsc
+	)
 endif()
 
 if(ENABLE_OPENMP AND NOT MSVC)
