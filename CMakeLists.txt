@@ -16,14 +16,10 @@ add_executable(udu c/udu.c)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	target_compile_options(udu PRIVATE
-		-Wall -Wextra -Wshadow -Wconversion -pedantic
-		$<$<CONFIG:Release>:-march=native -mtune=native>
-		$<$<CONFIG:RelWithDebInfo>:-march=native -mtune=native>
-	)
+	-Wall -Wextra -Wshadow -Wconversion -pedantic)
 elseif(MSVC)
 	target_compile_options(udu PRIVATE
-		/W4 /permissive- /volatile:iso /EHsc
-	)
+	/W4 /permissive- /volatile:iso /EHsc)
 endif()
 
 if(ENABLE_OPENMP AND NOT MSVC)
