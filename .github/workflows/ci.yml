@@ -39,7 +39,7 @@ jobs:
       - name: Setup MSVC
         uses: microsoft/setup-msbuild@v2
         with:
-          vs-version: '[16.4,16.5)'
+          vs-version: '[17,18)'
 
       - name: Configure
         run: cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo
