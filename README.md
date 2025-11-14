@@ -14,19 +14,21 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 ## Build from Source
 
 ### C Implementation
-The C implementation provides the best performance, especially when built with [OpenMP](https://www.openmp.org/), to build it you need a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17 or later. You will also need [CMake](https://cmake.org/) 3.15. [OpenMP](https://www.openmp.org/) 3.1 or later (optional but recommended). Note that MSVC only supports OpenMP 2.0 so no parallel processing when built with MSVC.
+The C implementation provides the best performance, when built with [OpenMP](https://www.openmp.org/), to build it you need a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17 or later. You will also need [CMake](https://cmake.org/) 3.15, [OpenMP](https://www.openmp.org/) 3.1 or later (optional but recommended).
 
-(UNIX) Clone the repository and build:
+Note that MSVC only supports OpenMP 2.0 so no parallel processing when built with MSVC.
+
+[UNIX\] Clone the repository and build:
 ```bash
 git clone --depth=1 https://github.com/makestatic/udu.git
 cd udu
-cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
 cmake --build build
 cmake --install build  # may require administrator privileges
 ```
 
 ### Zig Implementation
-The Zig implementation offers easier cross-platform builds and good performance. to build it you only need [Zig](https://ziglang.org/) 0.15.2.
+The Zig implementation offers easier cross-platform builds while having good performance, to build it you only need [Zig](https://ziglang.org/) 0.15.2
 
 Clone the repository if you haven't already, then navigate to the zig directory and run the following command:
 
@@ -41,4 +43,4 @@ Examples: Run `udu /home` to check your home directory size. Use `udu -ex=node_m
 
 
 ## License
-This program is distributed under the [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html). See the [LICENSE](./LICENSE) file for full details.
+This program is distributed under the GNU General Public License version 3, See the [LICENSE](./LICENSE) file for full details.
