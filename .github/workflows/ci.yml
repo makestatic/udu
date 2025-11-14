@@ -20,13 +20,22 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          if [[ "${{ matrix.compiler }}" == clang-* ]]; then
-            sudo apt-get install -y ${{ matrix.compiler }} llvm-17-dev libomp-17-dev cmake make
+          COMPILER=${{ matrix.compiler }}
+          if [[ "$COMPILER" == clang-* ]]; then
+            sudo apt-get install -y ${COMPILER} llvm-17-dev libomp-17-dev cmake make
           else
-            sudo apt-get install -y ${{ matrix.compiler }} libgomp1 cmake make
+            sudo apt-get install -y ${COMPILER} libgomp1 cmake make
+          fi
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+        run: |
+          COMPILER=${{ matrix.compiler }}
+          if [[ "$COMPILER" == clang-* ]]; then
+            CC_PATH=$(which ${COMPILER})
+          else
+            CC_PATH=$(which ${COMPILER})
+          fi
+          cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${CC_PATH}
 
       - name: Build
         run: cmake --build build -v
@@ -38,11 +47,9 @@ jobs:
 
       - name: Setup MSVC
         uses: microsoft/setup-msbuild@v2
-        with:
-          vs-version: '[17,18)'
 
       - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
 
       - name: Build
         run: cmake --build build --config RelWithDebInfo
