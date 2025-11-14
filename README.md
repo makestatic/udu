@@ -1,77 +1,44 @@
 # UDU
+UDU is a fast, multithreaded, cross-platform tool for checking files and directories sizes. The C implementation can be up to 40% faster than the Zig implementation in some cases.
 
-UDU is a **fast, multithreaded, cross-platform tool** for checking files and directories sizes. 
+See [Benchmarks](./BENCHMARK) and [Reddit discussion](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/) about the performance outcome.
 
-> [!NOTE]
-> *The C version can be up to **40% faster** than the Zig version in some cases*
 
-See: [Benchmarks](./BENCHMARK) | [Reddit post I made discussing this outcome](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/)
+## Quick Install
+You can install the Zig implementation using the install script. The Zig implementation is provided as the default install option for easier cross-platform distribution.
 
-## Quick Install (Zig version)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install.sh | bash
 ```
 
 ## Build from Source
 
-### Requirements
+### C Implementation
+The C implementation provides the best performance, especially when built with [OpenMP](https://www.openmp.org/), to build it you need a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17 or later. You will also need [CMake](https://cmake.org/) 3.15. [OpenMP](https://www.openmp.org/) 3.1 or later (optional but recommended). Note that MSVC only supports OpenMP 2.0 so no parallel processing when built with MSVC.
 
-- GCC 9 / Clang 14 / MSVC 17 (VS 2022)
-- OpenMP 3.1 (optional but recommended)
-> [!WARNING]
-> *MSVC lacks support for OpenMP 3.1*
-- CMake 3.15
-
-If you want to build the Zig version, you need:
-- Zig 0.15.2
-
-
-Clone the repository:
+(UNIX) Clone the repository and build:
 ```bash
 git clone --depth=1 https://github.com/makestatic/udu.git
 cd udu
-```
-
-### C Version
-
-Build & install:
-```bash
-cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_OPENMP=ON -DENABLE_LTO=ON
 cmake --build build
-cmake --install build  # may require admin
+cmake --install build  # may require administrator privileges
 ```
 
-Optional build flags:
-```bash
-cmake -B build -DENABLE_OPENMP=OFF  # Disable parallel processing
-cmake -B build -DENABLE_LTO=OFF     # Disable link-time optimization
-```
+### Zig Implementation
+The Zig implementation offers easier cross-platform builds and good performance. to build it you only need [Zig](https://ziglang.org/) 0.15.2.
 
-### Zig Version
+Clone the repository if you haven't already, then navigate to the zig directory and run the following command:
+
 ```bash
-cd zig
 zig build -Doptimize=ReleaseSafe
 ```
 
 ## Usage
-```bash
+The basic command syntax is `udu <path>` with optional flags. Use `-ex=<name>` to exclude files or directories, `-v` or `--verbose` for detailed output, `-q` or `--quiet` for minimal output (default), `-h` or `--help` to display help, and `--version` to show the version number.
 
-udu <path> [-ex=<name|path>] [-v|--verbose] [-q|--quiet] [-h|--help] [--version]
+Examples: Run `udu /home` to check your home directory size. Use `udu -ex=node_modules .` to check the current directory while excluding `node_modules`. For multiple exclusions with verbose output, try `udu /var -ex=cache -ex=tmp -v`.
 
-    OPTIONS:
-    -ex=<name>       Exclude file or directory
-    -v, --verbose    Verbose output
-    -q, --quiet      Quiet output (default)
-    -h, --help       Show help message
-    --version        Show version
-
-    EXAMPLES:
-    udu /home
-    udu -ex=node_modules .
-    udu /var -ex=cache -ex=tmp -v
-
-```
 
 ## License
-
-This program is distributed under the terms of the GNU General Public License version 3 (GPL-3.0); See [LICENSE](./LICENSE) file.
+This program is distributed under the [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html). See the [LICENSE](./LICENSE) file for full details.
