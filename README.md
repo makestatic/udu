@@ -16,11 +16,11 @@ curl -fsSL https://raw.githubusercontent.com/makestatic/udu/main/scripts/install
 
 ### Requirements
 
-- GCC ≥ 9 / Clang ≥ 11 / MSVC ≥ 16
-- OpenMP ≥ 3 (optional but recommended)
+- GCC 9 / Clang 14 / MSVC 17 (VS 2022)
+- OpenMP 3.1 (optional but recommended)
 > [!WARNING]
-> *MSVC lacks support for OpenMP 3.0*
-- CMake ≥ 3.15
+> *MSVC lacks support for OpenMP 3.1*
+- CMake 3.15
 
 If you want to build the Zig version, you need:
 - Zig 0.15.2

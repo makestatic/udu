@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        compiler: [gcc-9, gcc-10, gcc-11, clang-17]
+        compiler: [gcc-9, gcc-10, gcc-11, clang-14]
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           COMPILER=${{ matrix.compiler }}
           if [[ "$COMPILER" == clang-* ]]; then
-            sudo apt-get install -y ${COMPILER} llvm-17-dev libomp-17-dev cmake make
+            sudo apt-get install -y ${COMPILER} libomp-14-dev cmake make
           else
             sudo apt-get install -y ${COMPILER} libgomp1 cmake make
           fi
@@ -30,11 +30,7 @@ jobs:
       - name: Configure
         run: |
           COMPILER=${{ matrix.compiler }}
-          if [[ "$COMPILER" == clang-* ]]; then
-            CC_PATH=$(which ${COMPILER})
-          else
-            CC_PATH=$(which ${COMPILER})
-          fi
+          CC_PATH=$(which ${COMPILER})
           cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${CC_PATH}
 
       - name: Build
@@ -52,4 +48,4 @@ jobs:
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
 
       - name: Build
-        run: cmake --build build --config RelWithDebInfo
+        run: cmake --build build -v --config RelWithDebInfo
