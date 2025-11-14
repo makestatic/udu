@@ -7,19 +7,17 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  linux-build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest]
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
         compiler: [gcc-9, gcc-10, gcc-11, clang-17]
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install toolchain (Linux)
-        if: runner.os == 'Linux'
+      - name: Install toolchain
         run: |
           sudo apt-get update
           if [[ "${{ matrix.compiler }}" == clang-* ]]; then
@@ -27,18 +25,24 @@ jobs:
           else
             sudo apt-get install -y ${{ matrix.compiler }} libgomp1 cmake make
 
-      - name: Setup MSVC (Windows)
-        if: runner.os == 'Windows'
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+
+      - name: Build
+        run: cmake --build build -v
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSVC
         uses: microsoft/setup-msbuild@v2
         with:
-          vs-version: '[16.4,16.4]'
+          vs-version: '[16.4,16.5)'
 
       - name: Configure
-        run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo
-          else
-            cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${{ matrix.compiler }}
+        run: cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
       - name: Build
         run: cmake --build build -v
