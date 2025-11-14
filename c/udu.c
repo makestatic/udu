@@ -338,7 +338,7 @@ static void scan_dir(const char* path, const Excludes* ex, Opts opts, int depth)
             if (opts.verbose)
             {
                 char tmp[32];
-                fmt_size(tmp, sizeof(tmp), sz);
+                human_size(tmp, sizeof(tmp), sz);
                 printf("%-10s %s\n", tmp, full);
             }
         }
