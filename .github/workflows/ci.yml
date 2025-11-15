@@ -60,6 +60,11 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-make
 
       - name: Configure
         run: cmake -B build
