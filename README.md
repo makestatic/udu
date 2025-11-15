@@ -1,7 +1,9 @@
 # UDU
-UDU is a fast, multithreaded, cross-platform tool for checking file and directory sizes. The C implementation can be up to 40% faster than the Zig implementation in some cases.
+[UDU](https://github.com/makestatic/udu) is a cross-platform, multithreaded tool for measuring file and directory sizes that implements a parallel traversal engine using [OpenMP](https://www.openmp.org/) that recursively scan directories extremely fast.
 
-See [Benchmarks](./BENCHMARK) and [Reddit discussion](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/) about the performance outcome.
+The C implementation can be up to 40% faster than the Zig implementation in some cases.
+
+See [Benchmarks](./BENCHMARK) and [Reddit discussion (i accidentally deleted the post)](https://www.reddit.com/r/C_Programming/comments/1oujlds/ported_my_zig_tool_to_c_and_got_almost_a_40/) about the performance outcome.
 
 
 ## Quick Install
