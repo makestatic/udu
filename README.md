@@ -1,5 +1,5 @@
 # UDU
-[UDU](https://github.com/makestatic/udu) is a cross-platform, multithreaded tool for measuring file and directory sizes that implements a parallel traversal engine using [OpenMP](https://www.openmp.org/) that recursively scan directories extremely fast.
+[UDU](https://github.com/makestatic/udu) is an extremely fast, cross-platform tool for measuring files and directories sizes that uses a parallel traversal engine, implemented using [OpenMP](https://www.openmp.org/), to recursively scans files and directories.
 
 The C implementation can be up to 40% faster than the Zig implementation in some cases.
 
