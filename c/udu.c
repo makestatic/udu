@@ -77,8 +77,6 @@ static const char* LICENSE =
   "This is free software, and you are welcome to redistribute it\n"
   "under the terms of the GNU General Public License.\n";
 
-static const char* VERSION = "2.0.3";
-
 #define MAX_TASK_DEPTH 64
 #define EX_INIT_CAPACITY 4
 

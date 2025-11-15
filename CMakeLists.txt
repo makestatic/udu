@@ -13,6 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_executable(udu c/udu.c)
+target_compile_definitions(udu PRIVATE VERSION="${PROJECT_VERSION}")
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	target_compile_options(udu PRIVATE
