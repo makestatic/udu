@@ -36,7 +36,6 @@
 #endif
 
 #if defined(_WIN32) || defined(WIN32)
-#include <intrin.h>
 #include <windows.h>
 
 #ifndef PATH_MAX
@@ -45,6 +44,9 @@
 
 #ifdef _MSC_VER
 #define strdup _strdup
+#include <intrin.h>
+#else
+#include <stdatomic.h>
 #endif
 
 #else
@@ -80,7 +82,7 @@ static const char* VERSION = "2.0.2";
 #define MAX_TASK_DEPTH 64
 #define EX_INIT_CAPACITY 4
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef _MSC_VER
 
 static volatile long long dirs = 0, files = 0, bytes = 0;
 

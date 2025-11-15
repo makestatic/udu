@@ -7,12 +7,12 @@ on:
     branches: [main]
 
 jobs:
-  linux-build:
+  linux:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
-        compiler: [gcc-9, gcc-10, gcc-11, clang-14]
+        compiler: [gcc-9, gcc-10, clang-14]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +31,11 @@ jobs:
         run: |
           COMPILER=${{ matrix.compiler }}
           CC_PATH=$(which ${COMPILER})
-          cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=${CC_PATH}
-
+          cmake -B build -DCMAKE_C_COMPILER=${CC_PATH}
       - name: Build
         run: cmake --build build -v
 
-  windows-build:
+  windows-msvc:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,11 +45,10 @@ jobs:
 
       - name: Configure
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
-
       - name: Build
-        run: cmake --build build -v --config RelWithDebInfo
+        run: cmake --build build -v
 
-  windows-msys2-build:
+  windows-msys2:
     runs-on: windows-latest
     defaults:
       run:
@@ -62,14 +60,8 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
-          update: true
-          install: >-
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-make
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
-
+        run: cmake -B build
       - name: Build
         run: cmake --build build -v
