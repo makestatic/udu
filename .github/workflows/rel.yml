@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu
           tar -czf udu-linux-x86_64.tar.gz -C build udu -C $GITHUB_WORKSPACE README.md LICENSE
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu
           tar -czf udu-linux-aarch64.tar.gz -C build udu -C $GITHUB_WORKSPACE README.md LICENSE
@@ -46,7 +46,7 @@ jobs:
       - run: brew install llvm libomp
       - run: |
           export PATH="/usr/local/opt/llvm/bin:$PATH"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu
           tar -czf udu-macos-x86_64.tar.gz -C build udu -C $GITHUB_WORKSPACE README.md LICENSE
@@ -62,7 +62,7 @@ jobs:
       - run: brew install llvm libomp
       - run: |
           export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu
           tar -czf udu-macos-arm64.tar.gz -C build udu -C $GITHUB_WORKSPACE README.md LICENSE
@@ -85,7 +85,7 @@ jobs:
             mingw-w64-clang-x86_64-llvm-openmp
       - shell: msys2 {0}
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu.exe
           tar -czf udu-windows-x86_64.tar.gz -C build udu.exe -C $GITHUB_WORKSPACE README.md LICENSE
@@ -108,7 +108,7 @@ jobs:
             mingw-w64-clang-aarch64-llvm-openmp
       - shell: msys2 {0}
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DSTATIC_OPENMP=ON
           cmake --build build
           strip build/udu.exe
           tar -czf udu-windows-aarch64.tar.gz -C build udu.exe -C $GITHUB_WORKSPACE README.md LICENSE
