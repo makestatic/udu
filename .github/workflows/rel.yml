@@ -6,102 +6,141 @@ on:
       - 'v*'
 
 jobs:
-  build:
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          # Linux GCC static
-          - runner: ubuntu-latest
-            os: linux
-            arch: x86_64
-          - runner: ubuntu-24.04-arm
-            os: linux
-            arch: aarch64
-          
-          # macOS Clang static
-          - runner: macos-15-intel
-            os: macos
-            arch: x86_64
-          - runner: macos-latest
-            os: macos
-            arch: arm64
-          
-          # Windows Clang MSYS2
-          - runner: windows-latest
-            os: windows
-            arch: x86_64
-            msys: CLANG64
-          - runner: windows-11-arm
-            os: windows
-            arch: aarch64
-            msys: CLANGARM64
-
-    steps:
-      - uses: actions/checkout@v4
-
-      # Install LLVM+OpenMP
-      - if: runner.os == 'macOS'
-        run: brew install llvm libomp 
-
-      # Setup MSYS2 Clang
-      - if: runner.os == 'Windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.msys }}
-          install: mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-clang mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-cmake mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-ninja
-
-      # Build Linux/macOS
-      - name: Build (Linux/macOS)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            # GCC static OpenMP
-            OPTS="-DCMAKE_C_FLAGS='-static -fopenmp' -DCMAKE_EXE_LINKER_FLAGS='-static'"
-          else
-            # Clang static OpenMP
-            OPTS="-DCMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang -DOpenMP_C_FLAGS='-fopenmp' -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.a -DCMAKE_C_FLAGS='-I$(brew --prefix libomp)/include'"
-          fi
-          
-          cmake -B build -DCMAKE_BUILD_TYPE=Release $OPTS
-          cmake --build build
-          strip build/udu
-          tar -czf udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz -C build udu
-
-      # Build Windows
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        shell: msys2 {0}
-        run: |
-          # Clang static OpenMP
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS='-static -fopenmp' -DCMAKE_EXE_LINKER_FLAGS='-static'
-          cmake --build build
-          strip build/udu.exe
-          tar -czf udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz -C build udu.exe
-
-      # Upload build artifact
-      - uses: actions/upload-artifact@v4
-        with:
-          name: udu-${{ matrix.os }}-${{ matrix.arch }}
-          path: udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
-
-  release:
-    needs: build
+  # Linux x86_64
+  linux-x64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      # Download build artifacts
+      - run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
+      - run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_C_FLAGS='-static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu
+          tar -czf udu-linux-x86_64.tar.gz -C build udu
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86_64
+          path: udu-linux-x86_64.tar.gz
+
+  # Linux ARM64
+  linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
+      - run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_C_FLAGS='-static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu
+          tar -czf udu-linux-aarch64.tar.gz -C build udu
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-aarch64
+          path: udu-linux-aarch64.tar.gz
+
+  # macOS x86_64
+  macos-x64:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install llvm libomp
+      - run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang \
+            -DOpenMP_C_FLAGS='-fopenmp -static-openmp' \
+            -DOpenMP_omp_LIBRARY=/usr/local/opt/libomp/lib/libomp.a \
+            -DCMAKE_C_FLAGS='-I/usr/local/opt/libomp/include -static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu
+          tar -czf udu-macos-x86_64.tar.gz -C build udu
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-x86_64
+          path: udu-macos-x86_64.tar.gz
+
+  # macOS ARM64
+  macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install llvm libomp
+      - run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang \
+            -DOpenMP_C_FLAGS='-fopenmp -static-openmp' \
+            -DOpenMP_omp_LIBRARY=/opt/homebrew/opt/libomp/lib/libomp.a \
+            -DCMAKE_C_FLAGS='-I/opt/homebrew/opt/libomp/include -static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu
+          tar -czf udu-macos-arm64.tar.gz -C build udu
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: udu-macos-arm64.tar.gz
+
+  # Windows x86_64
+  windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          install: mingw-w64-x86_64-clang mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+      - shell: msys2 {0}
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS='-static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu.exe
+          tar -czf udu-windows-x86_64.tar.gz -C build udu.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86_64
+          path: udu-windows-x86_64.tar.gz
+
+  # Windows ARM64
+  windows-arm64:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          install: mingw-w64-clangarm64-clang mingw-w64-clangarm64-cmake mingw-w64-clangarm64-ninja
+      - shell: msys2 {0}
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS='-static -fopenmp -static-openmp' \
+            -DCMAKE_EXE_LINKER_FLAGS='-static -fopenmp -static-openmp'
+          cmake --build build
+          strip build/udu.exe
+          tar -czf udu-windows-aarch64.tar.gz -C build udu.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-aarch64
+          path: udu-windows-aarch64.tar.gz
+
+  # Create release
+  release:
+    needs: [linux-x64, linux-arm64, macos-x64, macos-arm64, windows-x64, windows-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-      
-      # Move to root
       - run: mv */*.tar.gz .
-      
-      # Create GitHub release
       - run: |
           gh release create ${{ github.ref_name }} \
             --repo=${{ github.repository }} \
-            --title="${{ github.event.repository.name }} ${{ github.ref_name }}" \
+            --title="Release ${{ github.ref_name }}" \
             --generate-notes \
             *.tar.gz
