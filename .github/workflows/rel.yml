@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         include:
-          # Linux - GCC, static 
+          # Linux GCC static
           - runner: ubuntu-latest
             os: linux
             arch: x86_64
@@ -19,7 +19,7 @@ jobs:
             os: linux
             arch: aarch64
           
-          # macOS - Clang, static 
+          # macOS Clang static
           - runner: macos-15-intel
             os: macos
             arch: x86_64
@@ -27,7 +27,7 @@ jobs:
             os: macos
             arch: arm64
           
-          # Windows - Clang, static 
+          # Windows Clang MSYS2
           - runner: windows-latest
             os: windows
             arch: x86_64
@@ -40,45 +40,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # LLVM toolchain for macOS
+      # Install LLVM+OpenMP
       - if: runner.os == 'macOS'
         run: brew install llvm libomp 
 
-      # LLVM toolchain for Windows
+      # Setup MSYS2 Clang
       - if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msys }}
           install: mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-clang mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-cmake mingw-w64-${{ matrix.msys == 'CLANG64' && 'x86_64' || 'clangarm64' }}-ninja
 
-      # Configure, build, strip, and package binary
-      - name: Build
-        shell: ${{ runner.os == 'Windows' && 'msys2 {0}' || 'bash' }}
+      # Build Linux/macOS
+      - name: Build (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          # Set platform-specific CMake options
           if [ "${{ runner.os }}" = "Linux" ]; then
-            # Linux: GCC with static OpenMP 
+            # GCC static OpenMP
             OPTS="-DCMAKE_C_FLAGS='-static -fopenmp' -DCMAKE_EXE_LINKER_FLAGS='-static'"
-          elif [ "${{ runner.os }}" = "macOS" ]; then
-            # macOS: Clang with static OpenMP
-            OPTS="-DCMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang -DOpenMP_C_FLAGS='-fopenmp' -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.a -DCMAKE_C_FLAGS='-I$(brew --prefix libomp)/include'"
           else
-            # Windows: Clang with static OpenMP
-            OPTS="-DCMAKE_C_FLAGS='-static -fopenmp' -DCMAKE_EXE_LINKER_FLAGS='-static'"
+            # Clang static OpenMP
+            OPTS="-DCMAKE_C_COMPILER=$(brew --prefix llvm)/bin/clang -DOpenMP_C_FLAGS='-fopenmp' -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.a -DCMAKE_C_FLAGS='-I$(brew --prefix libomp)/include'"
           fi
           
-          # Build 
           cmake -B build -DCMAKE_BUILD_TYPE=Release $OPTS
           cmake --build build
-          
-          # Strip 
-          [ "${{ runner.os }}" = "Windows" ] && EXE=".exe" || EXE=""
-          strip build/udu$EXE
+          strip build/udu
+          tar -czf udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz -C build udu
 
-          # Package
-          tar -czf udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz -C build udu$EXE
+      # Build Windows
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          # Clang static OpenMP
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS='-static -fopenmp' -DCMAKE_EXE_LINKER_FLAGS='-static'
+          cmake --build build
+          strip build/udu.exe
+          tar -czf udu-${{ matrix.os }}-${{ matrix.arch }}.tar.gz -C build udu.exe
 
-      # Upload artifact for release job
+      # Upload build artifact
       - uses: actions/upload-artifact@v4
         with:
           name: udu-${{ matrix.os }}-${{ matrix.arch }}
@@ -90,13 +92,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # Download all build artifacts
+      # Download build artifacts
       - uses: actions/download-artifact@v4
       
-      # Move archives to root directory
+      # Move to root
       - run: mv */*.tar.gz .
       
-      # Create GitHub release and ship all binaries
+      # Create GitHub release
       - run: |
           gh release create ${{ github.ref_name }} \
             --repo=${{ github.repository }} \
