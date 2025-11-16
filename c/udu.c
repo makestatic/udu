@@ -22,7 +22,7 @@
 #define _GNU_SOURCE
 #endif
 
-#include <errno.h>
+// #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
