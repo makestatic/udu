@@ -6,7 +6,6 @@ on:
       - 'v*'
 
 jobs:
-  # Linux x86_64
   linux-x64:
     runs-on: ubuntu-latest
     steps:
@@ -16,13 +15,12 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu
-          tar -czf udu-linux-x86_64.tar.gz -C build udu
+          tar -czf udu-linux-x86_64.tar.gz -C build udu -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x86_64
           path: udu-linux-x86_64.tar.gz
 
-  # Linux ARM64
   linux-arm64:
     runs-on: ubuntu-24.04-arm
     steps:
@@ -32,13 +30,12 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu
-          tar -czf udu-linux-aarch64.tar.gz -C build udu
+          tar -czf udu-linux-aarch64.tar.gz -C build udu -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: linux-aarch64
           path: udu-linux-aarch64.tar.gz
 
-  # macOS x86_64
   macos-x64:
     runs-on: macos-15-intel
     steps:
@@ -49,13 +46,12 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu
-          tar -czf udu-macos-x86_64.tar.gz -C build udu
+          tar -czf udu-macos-x86_64.tar.gz -C build udu -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: macos-x86_64
           path: udu-macos-x86_64.tar.gz
 
-  # macOS ARM64
   macos-arm64:
     runs-on: macos-latest
     steps:
@@ -66,13 +62,12 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu
-          tar -czf udu-macos-arm64.tar.gz -C build udu
+          tar -czf udu-macos-arm64.tar.gz -C build udu -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: macos-arm64
           path: udu-macos-arm64.tar.gz
 
-  # Windows x86_64
   windows-x64:
     runs-on: windows-latest
     steps:
@@ -90,13 +85,12 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu.exe
-          tar -czf udu-windows-x86_64.tar.gz -C build udu.exe
+          tar -czf udu-windows-x86_64.tar.gz -C build udu.exe -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x86_64
           path: udu-windows-x86_64.tar.gz
 
-  # Windows ARM64
   windows-arm64:
     runs-on: windows-11-arm
     steps:
@@ -114,13 +108,13 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
           cmake --build build
           strip build/udu.exe
-          tar -czf udu-windows-aarch64.tar.gz -C build udu.exe
+          tar -czf udu-windows-aarch64.tar.gz -C build udu.exe -C . README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: windows-aarch64
           path: udu-windows-aarch64.tar.gz
 
-  # Create release
+  # create release
   release:
     needs: [linux-x64, linux-arm64, macos-x64, macos-arm64, windows-x64, windows-arm64]
     runs-on: ubuntu-latest
@@ -134,3 +128,5 @@ jobs:
             --title="Release ${{ github.ref_name }}" \
             --generate-notes \
             *.tar.gz
+        env:
+          GH_TOKEN: ${{ github.token }}
