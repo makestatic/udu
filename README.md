@@ -42,7 +42,7 @@ cmake --install build  # may require administrator privileges
 
 ### Zig Implementation
 
-The Zig implementation offers easier cross-platform builds while maintaining good performance, requiring only [Zig](https://ziglang.org/) 0.15.2 installed on your system. Clone the repository if you haven't already, then navigate to the `Zig` directory and run the build command:
+The Zig implementation offers easier cross-platform builds while maintaining good performance, requiring only [Zig](https://ziglang.org/) 0.15.2 installed on your system. Clone the repository if you haven't already, then navigate to the `zig` directory and run the build command:
 
 ```bash
 zig build -Doptimize=ReleaseFast
