@@ -1,14 +1,17 @@
-BasedOnStyle: Mozilla
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
-BreakBeforeBraces: Allman
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-AllowShortBlocksOnASingleLine: false
-AlwaysBreakAfterReturnType: None
-AlwaysBreakAfterDefinitionReturnType: None
-ColumnLimit: 80
-SpacesInSquareBrackets: false
-DerivePointerAlignment: false
-PointerAlignment: Left
+BasedOnStyle: GNU
+# IndentWidth: 4
+# TabWidth: 4
+# UseTab: Never
+# BreakBeforeBraces: Allman
+# AllowShortIfStatementsOnASingleLine: true
+# AllowShortLoopsOnASingleLine: true
+# AllowShortBlocksOnASingleLine: false
+# AlwaysBreakAfterReturnType: None
+# AlwaysBreakAfterDefinitionReturnType: None
+# ColumnLimit: 80
+# SpacesInSquareBrackets: false
+# DerivePointerAlignment: false
+# PointerAlignment: Left
+#
+# IndentPPDirectives: BeforeHash
+# SpaceBeforeParens: ControlStatements
