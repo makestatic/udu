@@ -13,7 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 	"Choose the type of build: Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 
-add_executable(udu c/udu.c)
+add_executable(udu C/udu.c C/util.h C/xxhash.h)
 target_compile_definitions(udu PRIVATE VERSION="${PROJECT_VERSION}")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
