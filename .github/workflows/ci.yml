@@ -7,66 +7,104 @@ on:
     branches: [main]
 
 jobs:
-  linux:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm]
-        compiler: [gcc-9, gcc-10, clang-14]
-
+  linux-x64-gcc9:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-9 libgomp1 cmake make
+      - run: cmake -B build -DCMAKE_C_COMPILER=gcc-9
+      - run: cmake --build build -v
 
-      - name: Install toolchain
-        run: |
-          sudo apt-get update
-          COMPILER=${{ matrix.compiler }}
-          if [[ "$COMPILER" == clang-* ]]; then
-            sudo apt-get install -y ${COMPILER} libomp-14-dev cmake make
-          else
-            sudo apt-get install -y ${COMPILER} libgomp1 cmake make
-          fi
+  linux-x64-gcc10:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-10 libgomp1 cmake make
+      - run: cmake -B build -DCMAKE_C_COMPILER=gcc-10
+      - run: cmake --build build -v
 
-      - name: Configure
-        run: |
-          COMPILER=${{ matrix.compiler }}
-          CC_PATH=$(which ${COMPILER})
-          cmake -B build -DCMAKE_C_COMPILER=${CC_PATH}
-      - name: Build
-        run: cmake --build build -v
+  linux-arm64-gcc9:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-9 libgomp1 cmake make
+      - run: cmake -B build -DCMAKE_C_COMPILER=gcc-9
+      - run: cmake --build build -v
 
-  windows-msvc:
+  linux-arm64-gcc10:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-10 libgomp1 cmake make
+      - run: cmake -B build -DCMAKE_C_COMPILER=gcc-10
+      - run: cmake --build build -v
+
+  macos-x64:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install llvm libomp
+      - run: export PATH="/usr/local/opt/llvm/bin:$PATH"
+      - run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build -v
+
+  macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install llvm libomp
+      - run: export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+      - run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build -v
+
+  windows-x64-msvc:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - run: cmake -B build -G "Visual Studio 17 2022" -A x64
+      - run: cmake --build build -v
 
-      - name: Setup MSVC
-        uses: microsoft/setup-msbuild@v2
+  windows-arm64-msvc:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - run: cmake -B build -G "Visual Studio 17 2022" -A ARM64
+      - run: cmake --build build -v
 
-      - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64
-      - name: Build
-        run: cmake --build build -v
-
-  windows-msys2:
+  windows-x64-msys2:
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup MSYS2
-        uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
           update: true
-          install: >-
+          install: |
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-make
+      - run: cmake -B build
+      - run: cmake --build build -v
 
-      - name: Configure
-        run: cmake -B build
-      - name: Build
-        run: cmake --build build -v
+  windows-arm64-msys2:
+    runs-on: windows-11-arm
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRTARM64
+          update: true
+          install: |
+            mingw-w64-ucrt-aarch64-gcc
+            mingw-w64-ucrt-aarch64-cmake
+            mingw-w64-ucrt-aarch64-make
+      - run: cmake -B build
+      - run: cmake --build build -v
