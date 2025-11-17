@@ -54,7 +54,6 @@ zig build -Doptimize=ReleaseFast
 udu <path> [-ex=<name|path>] [-sb|--size-apparent] [-v|--verbose] [-q|--quiet] [-h|--help] [--version]
 ```
 
-The minimal command syntax is `udu <path>` with optional flags. Use `-ex=<pattern>` to exclude file or directory (can be specified multiple times), `-v` or `--verbose` for detailed output printing individual directory sizes, `-q` or `--quiet` for minimal output printing only the total (default), `-h` or `--help` to display the help message, and `--version` to print the version number.
 
 ## License
 
