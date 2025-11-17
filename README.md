@@ -59,6 +59,6 @@ udu <path> [-ex=<name|path>] [-sb|--size-apparent] [-v|--verbose] [-q|--quiet] [
 
 This program is distributed under the GNU General Public License version 3, see the [LICENSE](./LICENSE) file for details.
 
-# Acknowledgements
+## Acknowledgements
 - Thanks to the [OpenMP](https://openmp.org) specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.  
 - Thanks to [xxHash](https://github.com/Cyan4973/xxHash) for fast hashing.
