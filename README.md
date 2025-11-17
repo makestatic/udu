@@ -21,7 +21,7 @@ The C implementation provides the best performance when built with OpenMP, requi
 Clone the repository and build using these commands:
 
 ```bash
-git clone --depth=1 https://github.com/makestatic/udu.git
+git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
 cmake --build build
@@ -33,7 +33,7 @@ cmake --install build  # may require administrator privileges
 After installing MSYS2, open the UCRT64 terminal and install the required packages using `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake`, then clone the repository and build:
 
 ```bash
-git clone --depth=1 https://github.com/makestatic/udu.git
+git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
 cmake --build build
@@ -60,5 +60,5 @@ udu <path> [-ex=<name|path>] [-sb|--size-apparent] [-v|--verbose] [-q|--quiet] [
 This program is distributed under the GNU General Public License version 3, see the [LICENSE](./LICENSE) file for details.
 
 ## Acknowledgements
-- Thanks to the [OpenMP](https://openmp.org) specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.  
+- Thanks to [OpenMP](https://openmp.org) specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.  
 - Thanks to [xxHash](https://github.com/Cyan4973/xxHash) for fast hashing.
