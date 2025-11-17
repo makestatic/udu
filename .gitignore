@@ -1,6 +1,6 @@
 /build/
 /zig-out/
-Zig/zig-out/
+zig/zig-out/
 /.zig-cache/
-Zig/.zig-cache/
+zig/.zig-cache/
 *.log
