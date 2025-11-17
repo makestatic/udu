@@ -1,0 +1,11 @@
+udu <path> [OPTIONS]
+
+OPTIONS:
+    -ex=<path>      Exclude directory (repeatable)
+    -q, --quiet     Quiet output (default)
+    -v, --verbose   Verbose output
+    -h, --help      Show this help message
+    --version       Show version
+
+EXAMPLE:
+    udu ~/ -v
