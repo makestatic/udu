@@ -35,20 +35,32 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+
+#ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
+#endif
+
 #ifdef _MSC_VER
 #define strdup _strdup
 #include <intrin.h>
+
 #else
+
 #include <stdatomic.h>
 #endif
+
 #else
+
 #include <dirent.h>
 #include <stdatomic.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#ifndef PATH_MAX
 #define PATH_MAX 4096
+#endif
+
 #endif
 
 #include "util.h"
