@@ -14,12 +14,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32)
-#define _CRT_SECURE_NO_WARNINGS
-#else
-#define _GNU_SOURCE
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
