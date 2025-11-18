@@ -1,4 +1,5 @@
 #!/bin/sh
 
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
-cmake --build build
+# cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+cmake --build build -v

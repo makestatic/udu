@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(udu VERSION 3.0.0 LANGUAGES C)
+project(udu VERSION 0.4.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -13,7 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 	"Choose the type of build: Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 
-add_executable(udu C/udu.c C/util.h C/xxhash.h)
+add_executable(udu C/udu.c C/types.h C/platform.c C/platform.h C/util.c C/util.h C/xxhash.h)
 target_compile_definitions(udu PRIVATE VERSION="${PROJECT_VERSION}")
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
@@ -22,7 +22,7 @@ endif()
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	target_compile_options(udu PRIVATE
-	-Wall -Wextra -Wshadow -Wconversion -pedantic)
+	-Wall -Wextra -Wunused -Wshadow -Wconversion -pedantic)
 elseif(MSVC)
 	target_compile_options(udu PRIVATE
 	/W4 /permissive- /volatile:iso /EHsc)

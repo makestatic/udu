@@ -1,12 +1,41 @@
 # UDU
 
-UDU is an extremely fast and cross-platform tool for measuring file and directory sizes, using a parallel traversal engine implemented with [OpenMP](https://www.openmp.org/) to recursively scan directories, making it significantly faster than traditional tools on multi-core systems.
+**UDU** is an extremely fast, cross-platform tool for summarizing file and directory sizes by recursively scanning directories using a parallel traversal engine implemented with [OpenMP](https://www.openmp.org/), making it significantly faster than traditional tools on multi-core systems.
 
 See [Benchmarks](./BENCHMARKS.md) for performance comparisons.
 
-## Quick Install
 
-Working on it!
+## Architecture
+UDU uses a parallel directory traversal engine to compute file and directory sizes efficiently. The master thread starts at the given path and spawns worker threads for each subdirectory. Each worker recursively enumerates its directory, computing file sizes directly and spawning further threads for nested directories. At the end the results propagate back to the master thread for aggregation.
+
+
+```
+
+         +----------------+
+         | MASTER THREAD  |
+         |     <path>     |
+         +--------+-------+
+                  |
+      -------------------------
+      |           |           |
++-----v-----+ +---v-----+ +---v-----+
+| FILE      | | DIR A   | | DIR B   |
+| (compute) | | (spawn) | | (spawn) |
++-----------+ +---------+ +---------+
+                  |           |
+          -------------------------
+          |           |           |
+      +---v---+   +---v---+   +---v---+
+      | FILE  |   | DIR C |   | DIR D |
+      +-------+   +-------+   +-------+
+                  |           |
+             +----v-----+ +---v------+
+             | WORKER C | | WORKER D |
+             +----------+ +----------+
+                  |           |
+                 ...         ...
+
+```
 
 ## Build from Source
 
@@ -28,7 +57,7 @@ cmake --build build
 cmake --install build  # may require administrator privileges
 ```
 
-#### MSYS2 Build Instructions
+#### Windows (MSYS2) Build Instructions
 
 After installing MSYS2, open the UCRT64 terminal and install the required packages using `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake`, then clone the repository and build:
 
@@ -40,24 +69,24 @@ cmake --build build
 cmake --install build  # may require administrator privileges
 ```
 
-### Zig Implementation
-
-The Zig implementation offers easier cross-platform builds while maintaining good performance, requiring only [Zig](https://ziglang.org/) 0.15.2 installed on your system. Clone the repository if you haven't already, then navigate to the `zig` directory and run the build command:
-
-```bash
-zig build -Doptimize=ReleaseFast
-```
-
 ## Usage
 
 ```bash
-udu <path> [-ex=<name|path>] [-sb|--size-apparent] [-v|--verbose] [-q|--quiet] [-h|--help] [--version]
+udu <path>... [OPTIONS]...
+
+  -a, --apparent-size            display apparent sizes rather than device usage
+  -v, --verbose                  enable verbose output
+  -q, --quiet                    enable quiet output (default)
+  -X <name>, --exclude=<name>    exclude file or directory
+  -h, --help                     display this help and exit
+      --version                  display version information and exit
 ```
 
 
 ## License
 
-This program is distributed under the GNU General Public License version 3, see the [LICENSE](./LICENSE) file for details.
+This program is distributed under the GNU General Public License Version 3, see the [LICENSE](./LICENSE) file for details.
+
 
 ## Acknowledgements
 - Thanks to [OpenMP](https://openmp.org) specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.  
