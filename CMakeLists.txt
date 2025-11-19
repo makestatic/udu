@@ -4,8 +4,8 @@ project(udu VERSION 0.4.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-option(ENABLE_OPENMP "Enable Parallel Processing" OFF)
-option(ENABLE_LTO "Enable Link Time Optimization" OFF)
+option(ENABLE_OPENMP "Enable Parallel Processing" ON)
+option(ENABLE_LTO "Enable Link Time Optimization" ON)
 option(STATIC_OPENMP "Link OpenMP statically" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
