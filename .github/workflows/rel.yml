@@ -83,11 +83,12 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-make
+            mingw-w64-ucrt-x86_64-7zip
       - run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DENABLE_OPENMP=ON -DSTATIC_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build 
           strip build/udu.exe
-          zip -r udu-windows-x86_64.zip build/udu.exe README.md LICENSE
+          7z a udu-windows-x86_64.zip build/udu.exe README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x86_64
@@ -109,11 +110,12 @@ jobs:
             mingw-w64-clang-aarch64-clang
             mingw-w64-clang-aarch64-cmake
             mingw-w64-clang-aarch64-make
+            mingw-w64-clang-aarch64-7zip
       - run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DENABLE_OPENMP=ON -DSTATIC_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build 
           strip build/udu.exe
-          zip -r udu-windows-aarch64.zip build/udu.exe README.md LICENSE
+          7z a udu-windows-aarch64.zip build/udu.exe README.md LICENSE
       - uses: actions/upload-artifact@v4
         with:
           name: windows-arm64
