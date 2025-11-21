@@ -8,7 +8,7 @@ See [Benchmarks](./BENCHMARKS.md).
 ## Build Instructions
 Building **UDU** requires a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17.2 or later, along with [CMake](https://cmake.org/) 3.15 or later and [OpenMP](https://www.openmp.org/) 3.0 or later (optional: parallel processing).
 
-**NOTE ON WINDOWS:** MSVC versions less than 17.2 lack support for the OpenMP 3.0 features required by this program. If you're using an older MSVC version, the build system will automatically detect this and compile without OpenMP (single-threaded mode). For maximum performance on Windows, we recommend using [MSVC](https://visualstudio.microsoft.com/) 17.2 (VS 2022) or later with LLVM OpenMP runtime (the build system handles that for you), or alternatively GCC or Clang through [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/), which provide modern compilers with complete OpenMP 3.0 support.
+**NOTE ON WINDOWS:** MSVC versions less than 17.2 lack support for the OpenMP 3.0 features required by this program. If you're using an older MSVC version, the build system will automatically detect this and compile without OpenMP (single-threaded mode). For maximum performance on Windows, we recommend using [MSVC](https://visualstudio.microsoft.com/) 17.2 (VS 2022) or later with LLVM OpenMP runtime (the build system handles that for you), or alternatively GCC or Clang through [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/), which provide modern toolchains with complete OpenMP 3.0 support.
 
 #### UNIX
 Clone the repository and build using these commands:
