@@ -36,8 +36,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     )
 
     target_compile_definitions(udu PRIVATE
-		#_POSIX_C_SOURCE=200809L
-        #_FORTIFY_SOURCE=2
+        #_FORTIFY_SOURCE=3
     )
 elseif(MSVC)
     target_compile_options(udu PRIVATE
@@ -60,15 +59,34 @@ if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_SYSTEM_PROCESSOR MATCHES "aarch
 endif()
 
 if(ENABLE_OPENMP)
-    find_package(OpenMP 3.1 QUIET)
-    if(OpenMP_C_FOUND)
-            target_link_libraries(udu PRIVATE OpenMP::OpenMP_C)
-            message(STATUS "OpenMP enabled (dynamic linking)")
-    else()
-        message(WARNING "OpenMP not found; building without parallel processing")
+    if(MSVC)
+        if(MSVC_VERSION LESS 1932)  # MSVC 17.2 = 1932
+            message(WARNING 
+                "MSVC version ${MSVC_VERSION} lacks support for OpenMP 3.1 features (e.g. task parallelism). "
+                "MSVC 2022 17.2 or later is required for full OpenMP support. "
+                "Building WITHOUT OpenMP."
+            )
+            set(ENABLE_OPENMP OFF)
+        else()
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /openmp:llvm") # https://devblogs.microsoft.com/cppblog/openmp-task-support-for-c-in-visual-studio/
+        endif()
     endif()
-elseif(MSVC)
-    message(ERROR "MSVC lacks support for OpenMP 3.1")
+
+    if(ENABLE_OPENMP)
+        find_package(OpenMP 3.0 QUIET)
+        if(OpenMP_C_FOUND)
+            if(MSVC)
+				# already enabled it 
+                target_compile_definitions(udu PRIVATE _OPENMP)
+				message(STATUS "OpenMP enabled (MSVC::LLVM version: ${OpenMP_C_VERSION})")
+            else()
+                target_link_libraries(udu PRIVATE OpenMP::OpenMP_C)
+                message(STATUS "OpenMP enabled (version: ${OpenMP_C_VERSION})")
+            endif()
+        else()
+            message(WARNING "OpenMP 3.0 not found; building without parallel processing")
+        endif()
+    endif()
 endif()
 
 if(ENABLE_LTO)
