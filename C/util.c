@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// *readablety*
+// *readablelity*
 #define UC(s) ((const unsigned char *)(s))
 
 static bool match_class(const unsigned char **patp, unsigned char c)
