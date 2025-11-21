@@ -8,7 +8,7 @@
     #include <omp.h>
 #endif
 
-#define MAX_SYMLINK_DEPTH 8
+#define MAX_SYMLINK_DEPTH 64
 
 typedef struct
 {
@@ -59,7 +59,7 @@ static void walk_directory_impl(const char *path,
                                 walk_context_t *ctx,
                                 int depth)
 {
-    // Prevent infinite symlink loops
+    // dodge infinite symlink loops
     if (depth > MAX_SYMLINK_DEPTH)
     {
         if (ctx->verbose)
@@ -85,7 +85,6 @@ static void walk_directory_impl(const char *path,
             continue;
         }
 
-        // Skip symlinks to avoid infinite loops
         if (is_symlink(fullpath))
         {
             free(fullpath);
