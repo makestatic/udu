@@ -8,12 +8,12 @@ See [Benchmarks](./BENCHMARKS.md).
 ## Build Instructions
 Building **UDU** requires a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17.2 or later, along with [CMake](https://cmake.org/) 3.15 or later and [OpenMP](https://www.openmp.org/) 3.0 or later (optional: parallel processing).
 
-**Note on Windows:** MSVC versions prior to 2022 17.2 only support OpenMP 2.0, which lacks the task parallelism features required by this program. If you're using an older MSVC version, the build system will automatically detect this and compile without OpenMP (single-threaded mode). For full parallel performance on Windows, we recommend using [MSVC](https://visualstudio.microsoft.com/) 2022 17.2 or later with LLVM OpenMP runtime (build system handles that for you), or alternatively GCC or Clang through [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/), which provide modern compilers with complete OpenMP 3.0 support.
+**NOTE ON WINDOWS:** MSVC versions less than 17.2 lack support for the OpenMP 3.0 features required by this program. If you're using an older MSVC version, the build system will automatically detect this and compile without OpenMP (single-threaded mode). For maximum performance on Windows, we recommend using [MSVC](https://visualstudio.microsoft.com/) 17.2 (VS 2022) or later with LLVM OpenMP runtime (the build system handles that for you), or alternatively GCC or Clang through [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/), which provide modern compilers with complete OpenMP 3.0 support.
 
-#### Unix
+#### UNIX
 Clone the repository and build using these commands:
 
-```
+```bash
 git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
@@ -26,7 +26,7 @@ After installing MSYS2, open the UCRT64 terminal and install the required packag
 #### Windows (MSVC)
 Using Developer Command Prompt or PowerShell with Visual Studio environment:
 
-```
+```cmd
 git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
@@ -35,7 +35,7 @@ cmake --build build --config Release
 
 ## Usage
 
-```
+```bash
 Usage: udu [option(s)]... [path(s)]...
  extremely fast disk usage analyzer with parallel traversal engine.
 
@@ -56,11 +56,11 @@ Usage: udu [option(s)]... [path(s)]...
  EXAMPLE:
    udu ~/ -avX epstein-files
 
-Report bugs to <https://github.com/makestatic/udu/issues>
+Report bugs to <https://github.com/gnualmalki/udu/issues>
 ```
 
 ## License
-THIS PROGRAM IS DISTRIBUTED UNDER GPL-3.0-OR-LATER, SEE THE [LICENSE](./LICENSE) FILE FOR DETAILS.
+THIS PROGRAM IS DISTRIBUTED UNDER GPL-3-OR-LATER, SEE THE [LICENSE](./LICENSE) FILE FOR DETAILS.
 
 ## Acknowledgements
-Thanks to the [OpenMP ARB](https://openmp.org) for the OpenMP specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing accessible.
+Thanks to [OpenMP ARB](https://openmp.org) for OpenMP specifications and Thanks to its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.
