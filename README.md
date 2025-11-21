@@ -13,7 +13,7 @@ Building **UDU** requires a modern C compiler such as [GCC](https://gcc.gnu.org/
 #### UNIX
 Clone the repository and build using these commands:
 
-```bash
+```
 git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
@@ -26,7 +26,7 @@ After installing MSYS2, open the UCRT64 terminal and install the required packag
 #### Windows (MSVC)
 Using Developer Command Prompt or PowerShell with Visual Studio environment:
 
-```cmd
+```
 git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
@@ -35,7 +35,7 @@ cmake --build build --config Release
 
 ## Usage
 
-```bash
+```
 Usage: udu [option(s)]... [path(s)]...
  extremely fast disk usage analyzer with parallel traversal engine.
 
