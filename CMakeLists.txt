@@ -64,7 +64,8 @@ if(ENABLE_OPENMP)
             message(WARNING 
 				"MSVC version ${MSVC_VERSION} lacks support for needed OpenMP 3.0 features (e.g. task parallelism). "
                 "MSVC 2022 17.2 or later is required for full OpenMP support. "
-                "BUILDING WITHOUT OPENMP (SINGLE-THREADED MODE)."
+                "BUILDING WITHOUT OPENMP (SINGLE-THREADED MODE).\n\n"
+				"See: https://github.com/gnualmalki/udu?tab=readme-ov-file#build-instructions"
             )
             set(ENABLE_OPENMP OFF)
         else()
