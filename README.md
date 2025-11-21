@@ -6,30 +6,36 @@
 See [Benchmarks](./BENCHMARKS.md).
 
 ## Build Instructions
-building *UDU* requires a modern C compiler such as [GCC](https://gcc.gnu.org/) 9.x or later, [Clang](https://clang.llvm.org/) 14.x or later, or [MSVC](https://visualstudio.microsoft.com/) 17.x or later, along with [CMake](https://cmake.org/) 3.15 or later and [OpenMP](https://www.openmp.org/) 3.1 or later (optional: parallel processing).
+Building **UDU** requires a modern C compiler such as [GCC](https://gcc.gnu.org/) 9 or later, [Clang](https://clang.llvm.org/) 14 or later, or [MSVC](https://visualstudio.microsoft.com/) 17.2 or later, along with [CMake](https://cmake.org/) 3.15 or later and [OpenMP](https://www.openmp.org/) 3.0 or later (optional: parallel processing).
 
-**Note on Windows:** MSVC only supports OpenMP 2.0, which doesn't meet the requirements for building this program. We recommend using GCC or Clang through [MSYS2](https://www.msys2.org/) instead, though alternative Windows development environments like [Cygwin](https://www.cygwin.com/) also provide modern compiler toolchains with full OpenMP support.
+**Note on Windows:** MSVC versions prior to 2022 17.2 only support OpenMP 2.0, which lacks the task parallelism features required by this program. If you're using an older MSVC version, the build system will automatically detect this and compile without OpenMP (single-threaded mode). For full parallel performance on Windows, we recommend using [MSVC](https://visualstudio.microsoft.com/) 2022 17.2 or later with LLVM OpenMP runtime (build system handles that for you), or alternatively GCC or Clang through [MSYS2](https://www.msys2.org/) or [Cygwin](https://www.cygwin.com/), which provide modern compilers with complete OpenMP 3.0 support.
 
-#### UNIX
-
+#### Unix
 Clone the repository and build using these commands:
 
-```bash
+```
 git clone --depth=1 https://github.com/gnualmalki/udu.git
 cd udu
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
 cmake --build build
-cmake --install build  # may require administrator privileges
 ```
 
 #### Windows (MSYS2)
+After installing MSYS2, open the UCRT64 terminal and install the required packages using `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake`, then follow the UNIX instructions above.
 
-After installing MSYS2, open the UCRT64 terminal and install the required packages using `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake`, then follow the instructions above.
+#### Windows (MSVC)
+Using Developer Command Prompt or PowerShell with Visual Studio environment:
 
+```
+git clone --depth=1 https://github.com/gnualmalki/udu.git
+cd udu
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+cmake --build build --config Release
+```
 
 ## Usage
 
-```bash
+```
 Usage: udu [option(s)]... [path(s)]...
  extremely fast disk usage analyzer with parallel traversal engine.
 
@@ -53,10 +59,8 @@ Usage: udu [option(s)]... [path(s)]...
 Report bugs to <https://github.com/makestatic/udu/issues>
 ```
 
-
 ## License
-This program is distributed under GPL-3.0 or later, see the [LICENSE](./LICENSE) file for details.
+THIS PROGRAM IS DISTRIBUTED UNDER GPL-3.0-OR-LATER, SEE THE [LICENSE](./LICENSE) FILE FOR DETAILS.
 
-
-### Acknowledgements
-- Thanks to the [OpenMP](https://openmp.org) specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.
+## Acknowledgements
+Thanks to the [OpenMP ARB](https://openmp.org) for the OpenMP specification and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing accessible.
