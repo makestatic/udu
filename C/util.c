@@ -1,127 +1,147 @@
-/* Copyright (C) 2023, 2024, 2025 Ali Almalki <gnualmalki@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 #include "util.h"
-#define UHASH_MINIMUM_CAPACITY 64
-#define UHASH_LOAD_FACTOR 0.5
+#include <stdio.h>
+#include <stdlib.h>
 
-uhash_table *
-uhash_init (size_t initial_capacity)
+// *readablety*
+#define UC(s) ((const unsigned char *)(s))
+
+static bool match_class(const unsigned char **patp, unsigned char c)
 {
-  initial_capacity = round_to_power_of_2 (initial_capacity);
+    const unsigned char *p = *patp;
+    bool negate = (*p == '!' || *p == '^');
+    if (negate) p++;
 
-  uhash_table *table = malloc (sizeof (uhash_table));
-  if (!table)
-    return NULL;
+    bool matched = false;
+    unsigned char prev = 0;
+    bool have_prev = false;
 
-  table->entries = calloc (initial_capacity, sizeof (uhash_entry));
-  if (!table->entries)
+    while (*p && *p != ']')
     {
-      free (table);
-      return NULL;
-    }
-
-  table->capacity = initial_capacity;
-  table->count = 0;
-  return table;
-}
-
-bool
-uhash_resize (uhash_table *table)
-{
-  size_t new_capacity = table->capacity << 1;
-  uhash_entry *new_entries = calloc (new_capacity, sizeof (uhash_entry));
-  if (!new_entries)
-    return false;
-
-  size_t index_mask = new_capacity - 1;
-  uhash_entry *old_entries = table->entries;
-
-  for (size_t i = 0; i < table->capacity; i++)
-    {
-      if (old_entries[i].occupied)
+        if (*p == '-' && have_prev && p[1] && p[1] != ']')
         {
-          size_t index = uhash_compute_hash (old_entries[i].key) & index_mask;
-          while (new_entries[index].occupied)
-            index = (index + 1) & index_mask;
-          new_entries[index] = old_entries[i];
+            if (prev <= c && c <= p[1]) matched = true;
+            p += 2;
+            have_prev = false;
+        }
+        else
+        {
+            if (*p == c) matched = true;
+            prev = *p++;
+            have_prev = true;
         }
     }
 
-  free (old_entries);
-  table->entries = new_entries;
-  table->capacity = new_capacity;
-  return true;
+    if (*p == ']') p++;
+    *patp = p;
+    return negate ? !matched : matched;
 }
 
-bool
-uhash_has (uhash_table *table, uhash_key key)
+static bool glob_match_impl(const unsigned char *pat, const unsigned char *txt)
 {
-  if (!table)
-    return false;
-
-  size_t index_mask = table->capacity - 1;
-  size_t index = uhash_compute_hash (key) & index_mask;
-  const size_t start_index = index;
-
-  do
+    while (*pat)
     {
-      if (!table->entries[index].occupied)
-        return false;
-      if (uhash_keys_equal (table->entries[index].key, key))
-        return true;
-      index = (index + 1) & index_mask;
-    }
-  while (index != start_index);
+        if (*pat == '*')
+        {
+            while (*pat == '*') pat++;
+            if (!*pat) return true;
 
-  return false;
+            for (const unsigned char *t = txt; *t; t++)
+            {
+                if (glob_match_impl(pat, t)) return true;
+            }
+            return false;
+        }
+        else if (*pat == '?')
+        {
+            if (!*txt) return false;
+            pat++;
+            txt++;
+        }
+        else if (*pat == '[')
+        {
+            if (!*txt) return false;
+            pat++;
+            if (!match_class(&pat, *txt)) return false;
+            txt++;
+        }
+        else
+        {
+            if (*pat != *txt) return false;
+            pat++;
+            txt++;
+        }
+    }
+    return *txt == '\0';
 }
 
-bool
-uhash_add (uhash_table *table, uhash_key key)
+bool glob_match(const char *pattern, const char *text)
 {
-  if (!table)
-    return false;
-
-  if (table->count * 2 >= table->capacity)
-    if (!uhash_resize (table))
-      return false;
-
-  size_t index_mask = table->capacity - 1;
-  size_t index = uhash_compute_hash (key) & index_mask;
-
-  while (table->entries[index].occupied)
-    {
-      if (uhash_keys_equal (table->entries[index].key, key))
-        return false;
-      index = (index + 1) & index_mask;
-    }
-
-  table->entries[index].key = key;
-  table->entries[index].occupied = true;
-  table->count++;
-  return true;
+    return pattern && text && glob_match_impl(UC(pattern), UC(text));
 }
 
-void
-uhash_nuke (uhash_table *table)
+char *path_join(const char *parent, const char *child)
 {
-  if (table)
+    if (!parent || !child) return NULL;
+
+    size_t plen = strlen(parent);
+    size_t clen = strlen(child);
+
+#ifdef _WIN32
+    const char sep = '\\';
+#else
+    const char sep = '/';
+#endif
+
+    bool has_sep =
+      plen > 0 && (parent[plen - 1] == '/' || parent[plen - 1] == '\\');
+    size_t total = plen + (has_sep ? 0 : 1) + clen + 1;
+
+    char *out = malloc(total);
+    if (!out) return NULL;
+
+    memcpy(out, parent, plen);
+    if (!has_sep)
     {
-      free (table->entries);
-      free (table);
+        out[plen] = sep;
+        memcpy(out + plen + 1, child, clen + 1);
     }
+    else
+    {
+        memcpy(out + plen, child, clen + 1);
+    }
+
+    return out;
+}
+
+const char *path_basename(const char *path)
+{
+    if (!path || !*path) return "";
+
+    const char *last = path;
+    for (const char *p = path; *p; p++)
+    {
+        if (*p == '/' || *p == '\\')
+        {
+            last = p + 1;
+        }
+    }
+    return last;
+}
+
+char *human_size(uint64_t bytes, char *buf, size_t buflen)
+{
+    static const char *units[] = { "B", "KB", "MB", "GB", "TB", "PB" };
+    static const size_t unit_count = sizeof(units) / sizeof(units[0]);
+
+    size_t unit = 0;
+    double size = (double)bytes;
+
+    while (size >= 1024.0 && unit < unit_count - 1)
+    {
+        size /= 1024.0;
+        unit++;
+    }
+
+    snprintf(buf, buflen, "%.2f%s", size, units[unit]);
+    return buf;
 }
