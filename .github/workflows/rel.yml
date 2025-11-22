@@ -43,12 +43,20 @@ jobs:
           msystem: UCRT64
           install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
 
-      - if: runner.os != 'Windows'
+      - if: runner.os == 'Linux'
         run: |
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++
+          cmake --build build -v
+
+      - if: runner.os == 'macOS'
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc-15 \
+            -DCMAKE_CXX_COMPILER=g++-15
           cmake --build build -v
 
       - if: runner.os == 'Windows'
@@ -64,7 +72,12 @@ jobs:
           mkdir artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           if [ "$RUNNER_OS" != "Windows" ]; then
-            find build -type f -executable -print -quit | xargs -I {} cp {} artifact/
+            find build -type f | while read -r file; do
+              if [ -x "$file" ] && [ ! -d "$file" ]; then
+                cp "$file" artifact/
+                break
+              fi
+            done
           else
             find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
           fi
