@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(udu VERSION 0.6.1 LANGUAGES C)
+project(udu VERSION 0.6.2 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
