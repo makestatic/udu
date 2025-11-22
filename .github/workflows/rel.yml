@@ -63,8 +63,11 @@ jobs:
         run: |
           mkdir artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
-          [ "$RUNNER_OS" != "Windows" ] && find build -type f -perm -111 | head -1 | xargs -I {} cp {} artifact/
-          [ "$RUNNER_OS" = "Windows" ] && find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
+          if [ "$RUNNER_OS" != "Windows" ]; then
+            find build -type f -executable -print -quit | xargs -I {} cp {} artifact/
+          else
+            find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
