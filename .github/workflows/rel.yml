@@ -3,7 +3,6 @@ name: release
 on:
   push:
     tags: ['udu@*']
-
   workflow_dispatch:
 
 jobs:
@@ -31,35 +30,42 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      
+
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y gcc cmake
-      
+
       - if: runner.os == 'macOS'
         run: brew install gcc cmake
-      
+
       - if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
           install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
-      
+
       - if: runner.os != 'Windows'
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -v
-      
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++
+          cmake --build build -v
+
       - if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -v
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -v
           cp /ucrt64/bin/libgomp-1.dll build/
-      
+
       - shell: bash
         run: |
           mkdir artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
-          [ "$RUNNER_OS" != "Windows" ] && find build -type f -executable | head -1 | xargs -I {} cp {} artifact/
+          [ "$RUNNER_OS" != "Windows" ] && find build -type f -perm -111 | head -1 | xargs -I {} cp {} artifact/
           [ "$RUNNER_OS" = "Windows" ] && find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
-      
+
       - uses: actions/upload-artifact@v4
         with:
           name: udu-${{ matrix.arch }}-${{ matrix.platform }}
@@ -76,14 +82,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      
+
       - run: |
           cd artifacts
           for d in */; do
             tar czf "../${d%/}.tar.gz" "$d"
             zip -r "../${d%/}.zip" "$d"
           done
-      
+
       - uses: softprops/action-gh-release@v2
         with:
           files: udu-*
