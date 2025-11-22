@@ -19,13 +19,13 @@ jobs:
           tar -xf xpack-gcc-15.2.0-1-linux-x64.tar.gz
       - run: |
           GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
-          GXX_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/g++"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DCMAKE_CXX_COMPILER="$GXX_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
+          chmod +x artifact/udu
       - uses: actions/upload-artifact@v4
         with:
           name: udu-x86_64-linux
@@ -41,13 +41,13 @@ jobs:
           tar -xf xpack-gcc-15.2.0-1-linux-arm64.tar.gz
       - run: |
           GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
-          GXX_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/g++"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DCMAKE_CXX_COMPILER="$GXX_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
+          chmod +x artifact/udu
       - uses: actions/upload-artifact@v4
         with:
           name: udu-aarch64-linux
@@ -59,12 +59,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
+          chmod +x artifact/udu
       - uses: actions/upload-artifact@v4
         with:
           name: udu-x86_64-macos
@@ -76,12 +77,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
+          chmod +x artifact/udu
       - uses: actions/upload-artifact@v4
         with:
           name: udu-aarch64-macos
@@ -125,6 +127,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+      - name: Get version from tag
+        id: version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#udu@}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       - run: |
           cd artifacts
           for d in */; do
@@ -136,12 +144,15 @@ jobs:
             fi
           done
           cd ..
+          sha256sum *.tar.gz *.zip 2>/dev/null > checksums.txt || sha256sum *.tar.gz *.zip > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
+          name: ${{ steps.version.outputs.version }}
           body: |
-            Official udu release built with GCC 15
+            Official udu binaries built with GCC 15
 
-            NOTE: Windows packages already contains the required OPENMP dll
+            NOTE: Windows packages contains the required OPENMP dll
           files: |
             *.tar.gz
             *.zip
+            checksums.txt
