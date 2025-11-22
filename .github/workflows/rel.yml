@@ -5,107 +5,138 @@ on:
     tags: ['udu@*']
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            arch: x64
-            platform: linux
-          - os: ubuntu-24.04-arm
-            arch: arm64
-            platform: linux
-          - os: macos-15-intel
-            arch: x64
-            platform: macos
-          - os: macos-latest
-            arch: arm64
-            platform: macos
-          - os: windows-latest
-            arch: x64
-            platform: windows-ucrt64
-    
-    runs-on: ${{ matrix.os }}
-    
+  build-linux-x64:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc cmake
+      - run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc
+          cmake --build build -v
+      - run: |
+          mkdir -p artifact
+          [ -f README.md ] && cp README.md artifact/
+          [ -f LICENSE ] && cp LICENSE artifact/
+          cp build/udu artifact/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: udu-x64-linux
+          path: artifact/
 
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y gcc cmake
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu cmake
+      - run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc
+          cmake --build build -v
+      - run: |
+          mkdir -p artifact
+          [ -f README.md ] && cp README.md artifact/
+          [ -f LICENSE ] && cp LICENSE artifact/
+          cp build/udu artifact/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: udu-arm64-linux
+          path: artifact/
 
-      - if: runner.os == 'macOS'
-        run: brew install gcc cmake
+  build-macos-x64:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install gcc cmake
+      - run: |
+          GCC_VER=$(ls /usr/local/bin/gcc-* 2>/dev/null | grep -o '[0-9]*$' | head -1)
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-${GCC_VER}
+          cmake --build build -v
+      - run: |
+          mkdir -p artifact
+          [ -f README.md ] && cp README.md artifact/
+          [ -f LICENSE ] && cp LICENSE artifact/
+          cp build/udu artifact/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: udu-x64-macos
+          path: artifact/
 
-      - if: runner.os == 'Windows'
-        uses: msys2/setup-msys2@v2
+  build-macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install gcc cmake
+      - run: |
+          GCC_VER=$(ls /opt/homebrew/bin/gcc-* 2>/dev/null | grep -o '[0-9]*$' | head -1)
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-${GCC_VER}
+          cmake --build build -v
+      - run: |
+          mkdir -p artifact
+          [ -f README.md ] && cp README.md artifact/
+          [ -f LICENSE ] && cp LICENSE artifact/
+          cp build/udu artifact/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: udu-arm64-macos
+          path: artifact/
+
+  build-windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
           install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
-
-      - if: runner.os == 'Linux'
+      - shell: msys2 {0}
         run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=gcc \
-            -DCMAKE_CXX_COMPILER=g++
-          cmake --build build -v
-
-      - if: runner.os == 'macOS'
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=gcc-15 \
-            -DCMAKE_CXX_COMPILER=g++-15
-          cmake --build build -v
-
-      - if: runner.os == 'Windows'
-        shell: msys2 {0}
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -v
           cp /ucrt64/bin/libgomp-1.dll build/
-
-      - shell: bash
+      - shell: msys2 {0}
         run: |
-          mkdir artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
-          if [ "$RUNNER_OS" != "Windows" ]; then
-            find build -type f | while read -r file; do
-              if [ -x "$file" ] && [ ! -d "$file" ]; then
-                cp "$file" artifact/
-                break
-              fi
-            done
-          else
-            find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
-          fi
-
+          mkdir -p artifact
+          [ -f README.md ] && cp README.md artifact/
+          [ -f LICENSE ] && cp LICENSE artifact/
+          cp build/udu.exe artifact/
+          cp build/libgomp-1.dll artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-${{ matrix.arch }}-${{ matrix.platform }}
+          name: udu-x64-windows
           path: artifact/
 
   release:
-    needs: build
+    needs:
+      - build-linux-x64
+      - build-linux-arm64
+      - build-macos-x64
+      - build-macos-arm64
+      - build-windows-x64
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/udu@')
-    permissions:
-      contents: write
-    
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - run: |
           cd artifacts
           for d in */; do
-            tar czf "../${d%/}.tar.gz" "$d"
-            zip -r "../${d%/}.zip" "$d"
+            base=$(basename "$d")
+            tar czf "../${base}.tar.gz" "$base"
+            zip -r "../${base}.zip" "$base"
           done
-
+          cd ..
+          sha256sum *.tar.gz *.zip > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
-          files: udu-*
+          body: "Windows builds include OpenMP DLL"
+          files: |
+            *.tar.gz
+            *.zip
+            checksums.txt
