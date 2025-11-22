@@ -13,40 +13,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y gcc cmake
+      - name: Install GCC 15
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt-get update
+          sudo apt-get install -y gcc-15 g++-15 cmake
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
           cmake --build build -v
       - run: |
           mkdir -p artifact
-          [ -f README.md ] && cp README.md artifact/
-          [ -f LICENSE ] && cp LICENSE artifact/
+          cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-x64-linux
+          name: udu-x86_64-linux
           path: artifact/
 
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu cmake
+      - name: Install aarch64 GCC 15
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt-get update
+          sudo apt-get install -y gcc-15-aarch64-linux-gnu g++-15-aarch64-linux-gnu cmake
       - run: |
           cmake -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc-15 \
+            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++-15
           cmake --build build -v
       - run: |
           mkdir -p artifact
-          [ -f README.md ] && cp README.md artifact/
-          [ -f LICENSE ] && cp LICENSE artifact/
+          cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-arm64-linux
+          name: udu-aarch64-linux
           path: artifact/
 
   build-macos-x64:
@@ -55,17 +62,15 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          GCC_VER=$(ls /usr/local/bin/gcc-* 2>/dev/null | grep -o '[0-9]*$' | head -1)
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-${GCC_VER}
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
           cmake --build build -v
       - run: |
           mkdir -p artifact
-          [ -f README.md ] && cp README.md artifact/
-          [ -f LICENSE ] && cp LICENSE artifact/
+          cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-x64-macos
+          name: udu-x86_64-macos
           path: artifact/
 
   build-macos-arm64:
@@ -74,17 +79,15 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          GCC_VER=$(ls /opt/homebrew/bin/gcc-* 2>/dev/null | grep -o '[0-9]*$' | head -1)
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-${GCC_VER}
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
           cmake --build build -v
       - run: |
           mkdir -p artifact
-          [ -f README.md ] && cp README.md artifact/
-          [ -f LICENSE ] && cp LICENSE artifact/
+          cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-arm64-macos
+          name: udu-aarch64-macos
           path: artifact/
 
   build-windows-x64:
@@ -99,17 +102,15 @@ jobs:
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -v
-          cp /ucrt64/bin/libgomp-1.dll build/
       - shell: msys2 {0}
         run: |
           mkdir -p artifact
-          [ -f README.md ] && cp README.md artifact/
-          [ -f LICENSE ] && cp LICENSE artifact/
+          cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu.exe artifact/
           cp build/libgomp-1.dll artifact/
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-x64-windows
+          name: udu-x86_64-windows
           path: artifact/
 
   release:
@@ -129,14 +130,15 @@ jobs:
           for d in */; do
             base=$(basename "$d")
             tar czf "../${base}.tar.gz" "$base"
-            zip -r "../${base}.zip" "$base"
           done
           cd ..
-          sha256sum *.tar.gz *.zip > checksums.txt
+          sha256sum *.tar.gz > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
-          body: "Windows builds include OpenMP DLL"
+          body: |
+            Official udu release built with GCC 15
+
+            NOTE: Windows packages already include the required OPENMP dll
           files: |
             *.tar.gz
-            *.zip
             checksums.txt
