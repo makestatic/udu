@@ -20,7 +20,7 @@ jobs:
           - os: ubuntu-24.04-arm
             arch: aarch64
             gcc_url: https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-arm64.tar.gz
-          - os: macos-15
+          - os: macos-15-intel
             arch: x86_64
           - os: macos-latest
             arch: aarch64
@@ -48,11 +48,10 @@ jobs:
           cmake --build build --parallel
           cp README.md LICENSE artifact/
           cp build/udu artifact/
-          chmod +x artifact/udu
 
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-${{ matrix.os }}-${{ matrix.arch }}
+          name: udu-${{ contains(matrix.os, 'ubuntu') && 'linux' || 'darwin' }}-${{ matrix.arch }}
           path: artifact/
 
   build-windows:
@@ -61,8 +60,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
-          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
+          msystem: MINGW64
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
 
       - shell: msys2 {0}
         run: |
@@ -73,7 +72,7 @@ jobs:
           cmake --build build --parallel
           cp README.md LICENSE artifact/
           cp build/udu.exe artifact/
-          cp /ucrt64/bin/libgomp* artifact/
+          cp /mingw64/bin/libgomp* artifact/
           
       - shell: pwsh
         run: |
