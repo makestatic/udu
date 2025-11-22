@@ -63,6 +63,6 @@ Report bugs to <https://github.com/gnualmalki/udu/issues>
 THIS PROGRAM IS DISTRIBUTED UNDER GPL-3-OR-LATER; SEE THE [LICENSE](./LICENSE) FILE FOR DETAILS.
 
 ### Acknowledgements
-- Thanks to [OpenMP](https://openmp.org) specifications and their implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.
+- Thanks to [OpenMP](https://openmp.org) specifications and its implementations by [GCC](https://gcc.gnu.org/) and [LLVM](https://llvm.org/) for making FOSS high-performance parallel computing possible.
 
-- Thanks to [xPcak](https://github.com/xpack-dev-tools/gcc-xpack) for providing the GCC version used in Release CI.
+- Thanks to [xPack](https://github.com/xpack-dev-tools/gcc-xpack) for providing the GCC version used in CI.
