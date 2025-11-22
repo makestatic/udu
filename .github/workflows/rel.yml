@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install GCC 15
+      - name: Download xPack GCC x64
         run: |
-          sudo apt install software-properties-common -y
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update
-          sudo apt-get install -y gcc-15 g++-15 cmake
+          wget https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-x64.tar.gz
+          tar -xf xpack-gcc-15.2.0-1-linux-x64.tar.gz
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
+          GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
+          GXX_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/g++"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DCMAKE_CXX_COMPILER="$GXX_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
@@ -32,22 +32,17 @@ jobs:
           path: artifact/
 
   build-linux-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-      - name: Install aarch64 GCC 15
+      - name: Download xPack GCC ARM64
         run: |
-          sudo apt install software-properties-common -y
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update
-          sudo apt-get install -y gcc-15-aarch64-linux-gnu g++-15-aarch64-linux-gnu cmake
+          wget https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-arm64.tar.gz
+          tar -xf xpack-gcc-15.2.0-1-linux-arm64.tar.gz
       - run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc-15 \
-            -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++-15
+          GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
+          GXX_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/g++"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DCMAKE_CXX_COMPILER="$GXX_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
@@ -64,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
@@ -81,7 +76,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: brew install gcc cmake
       - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DCMAKE_CXX_COMPILER=g++-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
           cmake --build build -v
       - run: |
           mkdir -p artifact
@@ -109,11 +104,14 @@ jobs:
           mkdir -p artifact
           cp README.md LICENSE artifact/ 2>/dev/null || true
           cp build/udu.exe artifact/
-          cp build/libgomp-1.dll artifact/
+          cp build/libgomp-1.dll artifact/ 2>/dev/null || true
+      - shell: pwsh
+        run: |
+          Compress-Archive -Path artifact\* -DestinationPath udu-x86_64-windows.zip
       - uses: actions/upload-artifact@v4
         with:
           name: udu-x86_64-windows
-          path: artifact/
+          path: udu-x86_64-windows.zip
 
   release:
     needs:
@@ -131,16 +129,19 @@ jobs:
           cd artifacts
           for d in */; do
             base=$(basename "$d")
-            tar czf "../${base}.tar.gz" "$base"
+            if [ -f "$d/udu-x86_64-windows.zip" ]; then
+              cp "$d/udu-x86_64-windows.zip" "../${base}.zip"
+            else
+              tar czf "../${base}.tar.gz" -C "$d" .
+            fi
           done
           cd ..
-          sha256sum *.tar.gz > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
           body: |
             Official udu release built with GCC 15
 
-            NOTE: Windows packages already include the required OPENMP dll
+            NOTE: Windows packages already contains the required OPENMP dll
           files: |
             *.tar.gz
-            checksums.txt
+            *.zip
