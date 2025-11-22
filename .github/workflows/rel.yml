@@ -1,0 +1,89 @@
+name: release
+
+on:
+  push:
+    tags: ['udu@*']
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: x64
+            platform: linux
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            platform: linux
+          - os: macos-15-intel
+            arch: x64
+            platform: macos
+          - os: macos-latest
+            arch: arm64
+            platform: macos
+          - os: windows-latest
+            arch: x64
+            platform: windows-ucrt64
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gcc cmake
+      
+      - if: runner.os == 'macOS'
+        run: brew install gcc cmake
+      
+      - if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
+      
+      - if: runner.os != 'Windows'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -v
+      
+      - if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -v
+          cp /ucrt64/bin/libgomp-1.dll build/
+      
+      - shell: bash
+        run: |
+          mkdir artifact
+          cp README.md LICENSE artifact/ 2>/dev/null || true
+          [ "$RUNNER_OS" != "Windows" ] && find build -type f -executable | head -1 | xargs -I {} cp {} artifact/
+          [ "$RUNNER_OS" = "Windows" ] && find build \( -name "*.exe" -o -name "*.dll" \) -exec cp {} artifact/ \;
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: udu-${{ matrix.arch }}-${{ matrix.platform }}
+          path: artifact/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/udu@')
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - run: |
+          cd artifacts
+          for d in */; do
+            tar czf "../${d%/}.tar.gz" "$d"
+            zip -r "../${d%/}.zip" "$d"
+          done
+      
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: udu-*
