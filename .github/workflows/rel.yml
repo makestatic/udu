@@ -9,87 +9,53 @@ permissions:
   contents: write
 
 jobs:
-  build-linux-x64:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+            gcc_url: https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-x64.tar.gz
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+            gcc_url: https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-arm64.tar.gz
+          - os: macos-15
+            arch: x86_64
+          - os: macos-latest
+            arch: aarch64
     steps:
       - uses: actions/checkout@v4
-      - name: Download xPack GCC x64
+
+      - name: Install dependencies
         run: |
-          wget https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-x64.tar.gz
-          tar -xf xpack-gcc-15.2.0-1-linux-x64.tar.gz
-      - run: |
-          GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
-          cmake --build build -v
-      - run: |
-          mkdir -p artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
-          cp build/udu artifact/
-          chmod +x artifact/udu
-      - uses: actions/upload-artifact@v4
-        with:
-          name: udu-x86_64-linux
-          path: artifact/
+          set -e
+          if [[ "${{ matrix.os }}" == ubuntu* ]]; then
+            wget ${{ matrix.gcc_url }}
+            tar -xf xpack-gcc-*.tar.gz
+            echo "CC=$(pwd)/xpack-gcc-15.2.0-1/bin/gcc" >> $GITHUB_ENV
+          elif [[ "${{ matrix.os }}" == macos* ]]; then
+            brew install gcc cmake
+            echo "CC=gcc-15" >> $GITHUB_ENV
+          fi
 
-  build-linux-arm64:
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download xPack GCC ARM64
+      - name: Configure and build
         run: |
-          wget https://github.com/xpack-dev-tools/gcc-xpack/releases/download/v15.2.0-1/xpack-gcc-15.2.0-1-linux-arm64.tar.gz
-          tar -xf xpack-gcc-15.2.0-1-linux-arm64.tar.gz
-      - run: |
-          GCC_BIN="${GITHUB_WORKSPACE}/xpack-gcc-15.2.0-1/bin/gcc"
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$GCC_BIN" -DENABLE_OPENMP=ON -DENABLE_LTO=ON
-          cmake --build build -v
-      - run: |
-          mkdir -p artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
+          set -e
+          rm -rf build
+          mkdir artifact
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$CC -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake --build build --parallel
+          cp README.md LICENSE artifact/
           cp build/udu artifact/
           chmod +x artifact/udu
+
       - uses: actions/upload-artifact@v4
         with:
-          name: udu-aarch64-linux
+          name: udu-${{ matrix.os }}-${{ matrix.arch }}
           path: artifact/
 
-  build-macos-x64:
-    runs-on: macos-15-intel
-    steps:
-      - uses: actions/checkout@v4
-      - run: brew install gcc cmake
-      - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
-          cmake --build build -v
-      - run: |
-          mkdir -p artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
-          cp build/udu artifact/
-          chmod +x artifact/udu
-      - uses: actions/upload-artifact@v4
-        with:
-          name: udu-x86_64-macos
-          path: artifact/
-
-  build-macos-arm64:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: brew install gcc cmake
-      - run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-15 -DENABLE_OPENMP=ON -DENABLE_LTO=ON
-          cmake --build build -v
-      - run: |
-          mkdir -p artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
-          cp build/udu artifact/
-          chmod +x artifact/udu
-      - uses: actions/upload-artifact@v4
-        with:
-          name: udu-aarch64-macos
-          path: artifact/
-
-  build-windows-x64:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,19 +63,23 @@ jobs:
         with:
           msystem: UCRT64
           install: mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake
+
       - shell: msys2 {0}
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build -v
-      - shell: msys2 {0}
-        run: |
-          mkdir -p artifact
-          cp README.md LICENSE artifact/ 2>/dev/null || true
+          set -e
+          rm -rf build
+          mkdir artifact
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_OPENMP=ON -DENABLE_LTO=ON
+          cmake --build build --parallel
+          cp README.md LICENSE artifact/
           cp build/udu.exe artifact/
-          cp build/libgomp-1.dll artifact/ 2>/dev/null || true
+          cp /ucrt64/bin/libgomp* artifact/
+          
       - shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
           Compress-Archive -Path artifact\* -DestinationPath udu-x86_64-windows.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: udu-x86_64-windows
@@ -117,41 +87,44 @@ jobs:
 
   release:
     needs:
-      - build-linux-x64
-      - build-linux-arm64
-      - build-macos-x64
-      - build-macos-arm64
-      - build-windows-x64
+      - build
+      - build-windows
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Get version from tag
+
+      - name: Extract version from tag
         id: version
         run: |
+          set -e
           TAG_NAME="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG_NAME#udu@}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-      - run: |
+
+      - name: Package all artifacts
+        run: |
+          set -e
           cd artifacts
           for d in */; do
-            base=$(basename "$d")
-            if [ -f "$d/udu-x86_64-windows.zip" ]; then
-              cp "$d/udu-x86_64-windows.zip" "../${base}.zip"
+            if [[ -f "$d/udu-x86_64-windows.zip" ]]; then
+              cp "$d/udu-x86_64-windows.zip" "../$(basename "$d").zip"
             else
-              tar czf "../${base}.tar.gz" -C "$d" .
+              chmod +x "$d/udu"
+              tar -czf "../$(basename "$d").tar.gz" -C "$d" .
             fi
           done
           cd ..
-          sha256sum *.tar.gz *.zip 2>/dev/null > checksums.txt || sha256sum *.tar.gz *.zip > checksums.txt
+          sha256sum *.tar.gz *.zip > checksums.txt
+
       - uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.version.outputs.version }}
           body: |
-            Official udu binaries built with GCC 15
-
-            NOTE: Windows packages contains the required OPENMP dll
+            Official binaries built with GCC 15
+            
+            NOTE: Windows packages contain the required OPENMP dll
           files: |
             *.tar.gz
             *.zip
